@@ -1,0 +1,133 @@
+{
+  "frames": [{
+      "name": "sprite-00",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-01",
+      "position": {
+        "x": 96,
+        "y": 0,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-02",
+      "position": {
+        "x": 0,
+        "y": 192,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-03",
+      "position": {
+        "x": 96,
+        "y": 192,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-04",
+      "position": {
+        "x": 0,
+        "y": 384,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-08",
+      "position": {
+        "x": 0,
+        "y": 768,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-09",
+      "position": {
+        "x": 96,
+        "y": 768,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-10",
+      "position": {
+        "x": 0,
+        "y": 960,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-11",
+      "position": {
+        "x": 96,
+        "y": 960,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-12",
+      "position": {
+        "x": 0,
+        "y": 1152,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-13",
+      "position": {
+        "x": 96,
+        "y": 1152,
+        "w": 96,
+        "h": 192
+      }
+    }
+
+  ],
+
+  "comments": [{
+      "name": "sprite-05",
+      "position": {
+        "x": 96,
+        "y": 384,
+        "w": 96,
+        "h": 192
+      }
+
+    },
+    {
+      "name": "sprite-06",
+      "position": {
+        "x": 0,
+        "y": 576,
+        "w": 96,
+        "h": 192
+      }
+    },
+    {
+      "name": "sprite-07",
+      "position": {
+        "x": 96,
+        "y": 576,
+        "w": 96,
+        "h": 192
+      }
+    }
+  ]
+}

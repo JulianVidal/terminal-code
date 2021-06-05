@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Application test</title>
+  <link rel="stylesheet" href="mainWindowStyle.css" type="text/css">
+</head>
+
+<body>
+
+<table class="center">
+<thead>
+  <h3 class="center centerText">Shopping List</h3>
+</thead>
+<tbody>
+  <tr>
+    <td>
+      <h4 class="centerText">Item Name</h4>
+    </td>
+    <td>
+      <h4 class="centerText">Item Value</h4>
+    </td>
+  </tr>
+<tr>
+  <td>
+  <ul id='item'>
+  </ul>
+  </td>
+  <td>
+    <ul id='value'>
+    </ul>
+  </td>
+</tr>
+  </tbody>
+</table>
+
+</body>
+
+<script>
+const electron = require('electron')
+const {ipcRenderer, ipcMain} = electron
+const ul = document.querySelector('ul')
+
+ipcRenderer.on('item:add', (e, item) => {
+  const li = document.createElement('li')
+  const itemText = document.createTextNode(item)
+  const ul = document.getElementById('item')
+  li.appendChild(itemText)
+  ul.appendChild(li)
+}
+)
+
+ipcRenderer.on('value:add', (e, item) => {
+  const li = document.createElement('li')
+  const itemText = document.createTextNode(item)
+  const ul = document.getElementById('value')
+  li.appendChild(itemText)
+  ul.appendChild(li)
+}
+
+ipcMain.on('clear', event => {function myFunction() {
+  let list = document.getElementById("myList");
+  
+  if (list.hasChildNodes()) {
+
+  for (let i = 0; i < list.childNodes.length; i++){
+    list.removeChild(list.firstChild)
+  }
+  list.removeChild(list.firstChild)
+ }
+}
+
+
+)
+</script>
+
+</html>

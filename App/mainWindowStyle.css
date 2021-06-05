@@ -1,0 +1,26 @@
+h3 {
+  width: 115px;
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.centerText {
+  text-align: center;
+}
+
+td {
+  width: auto;
+  padding-left: 75px;
+}
+
+h4 {
+  padding: 5px
+}
+
+ul {
+  list-style-type: upper-roman;
+  padding: 0px;
+}

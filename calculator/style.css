@@ -1,0 +1,115 @@
+html {
+  font-family: sans-serif;
+  font-size: 32px;
+  background-color: #2d283e;
+}
+
+.number {
+  background-color: #4c495d;
+  color: #d1d7e0;
+  font-size: inherit;
+  border: none;
+  border-radius: 7%;
+  margin: 3px;
+}
+
+#display-container {
+  width: 294px;
+  height: 100px;
+  text-align: right;
+  background-color: #4c495d;
+  color: #d1d7e0;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  border-radius: 7%;
+  margin-bottom: 3px;
+  font-size: 32px;
+}
+
+#display {
+  width: 90%;
+  margin: auto;
+}
+
+#buttons {
+  display: grid;
+  grid-template-areas: 
+  "ac ac ac div"
+  "one two three mul"
+  "four five six sub"
+  "seven eight nine add"
+  "zero zero dec equal";
+  width: 300px;
+  height: 400px;
+}
+
+
+#one {
+  grid-area: one;
+}
+
+#two {
+  grid-area: two;
+}
+
+#three {
+  grid-area: three;
+}
+
+#four {
+  grid-area: four;
+}
+
+#five {
+  grid-area: five;
+}
+
+#six {
+  grid-area: six;
+}
+
+#seven {
+  grid-area: seven;
+}
+
+
+#eight {
+  grid-area: eight;
+}
+
+#nine {
+  grid-area: nine;
+}
+
+#zero {
+  grid-area: zero;
+}
+
+#add {
+  grid-area: add;
+}
+
+#sub {
+  grid-area: sub;
+}
+
+#mul {
+  grid-area: mul;
+}
+
+#div {
+  grid-area: div;
+}
+
+#equal {
+  grid-area: equal;
+}
+
+#dec {
+  grid-area: dec;
+}
+
+#ac {
+  grid-area: ac;
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="note.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>History Notes</title>
+</head>
+
+<body>
+    <div class="UI">
+        <h1>Hisotry Notes Add</h1>
+        <div class="inputs">
+            <label>Book</label>
+            <input id="Book" class="input" type="text" placeholder="Book">
+
+            <label>Author</label>
+            <input id="Author" class="input" type="text" placeholder="Author">
+
+            <label>Page</label>
+            <input id="Page" class="input" type="text" placeholder="Page">
+
+            <label>Title</label>
+            <input id="Title" class="input" type="text" placeholder="Title">
+
+            <label>SubTitle</label>
+            <input id="SubTitle" class="input" type="text" placeholder="SubTitle">
+
+            <label>Tags</label>
+            <input id="Tags" class="input" type="text" placeholder="Tags">
+
+            <label>Paragraph</label>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <textarea id="Paragraph" class="Paragraph" class="input" placeholder="Paragraph"></textarea>
+
+        <button onclick="addNote()" id="addNote" class="button">Add Note</button>
+    </div>
+
+    <div class="UI">
+        <h1>Hisotry Notes Search</h1>
+        <div class="inputs">
+            <label>Book</label>
+            <input id="search-Book" class="input" type="text" placeholder="Book">
+
+            <label>Author</label>
+            <input id="search-Author" class="input" type="text" placeholder="Author">
+
+            <label>Page</label>
+            <input id="search-Page" class="input" type="text" placeholder="Page">
+
+            <label>Title</label>
+            <input id="search-Title" class="input" type="text" placeholder="Title">
+
+            <label>SubTitle</label>
+            <input id="search-SubTitle" class="input" type="text" placeholder="SubTitle">
+
+            <label>Tags</label>
+            <input id="search-Tags" class="input" type="text" placeholder="Tags">
+
+            <label>Paragraph</label>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <textarea id="search-Paragraph" class="input Paragraph" placeholder="Paragraph"></textarea>
+
+        <button onclick="searchNote()" id="search" class="button">Search Note</button>
+    </div>
+
+    <div id="result">
+
+        <h2 id="result-Book"></h2>
+        <h4 id="result-Author"></h4>
+        <h5 id="result-Page"></h5>
+        <h3 id="result-Title"></h3>
+        <h4 id="result-SubTitle"></h4>
+        <h5 id="result-Tags"></h5>
+        <p  id="result-Paragraph"></p>
+
+    </div>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+    <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyDkhMiMSiP0TV8W0mH-NJ9GIQylis7NBFg",
+            authDomain: "history-notes-24837.firebaseapp.com",
+            databaseURL: "https://history-notes-24837.firebaseio.com",
+            projectId: "history-notes-24837",
+            storageBucket: "history-notes-24837.appspot.com",
+            messagingSenderId: "222441523",
+            appId: "1:222441523:web:e7f9230c50ef679963b346"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "sticks",
+  "version": "1.0.0",
+  "description": "Sticks game in Mac",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "Julian Vidal",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^4.1.2",
+    "cross-env": "^6.0.0",
+    "electron": "^6.0.10",
+    "electron-builder": "^21.2.0",
+    "electron-packager": "^14.0.6",
+    "electron-prebuilt": "^1.4.13",
+    "wait-on": "^3.3.0"
+  },
+  "dependencies": {
+    "electron-is-dev": "^1.1.0"
+  },
+  "build": {
+  "appId": "com.example.app",
+  "mac": {
+    "category": "com.app.category.type"
+  }
+}
+}
