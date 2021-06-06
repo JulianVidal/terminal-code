@@ -337,8 +337,8 @@ class Canvas {
   }
 }
 
-class BinaryMaze {
-  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
+class Maze {
+  constructor(height = 500, width = 500, scale = 20) {
     this.height = height
     this.width = width
     this.scale = scale
@@ -346,13 +346,37 @@ class BinaryMaze {
     this.grid = []
     this.x = 0
     this.y = 0
-    this.dir = dir
 
     this.animating = false
+
     this.initGrid()
     this.canvas.loop(() => {
       this.draw(this)
     })
+  }
+
+  draw() {
+
+  }
+
+  initGrid() {
+  }
+
+  drawGrid() {
+  }
+
+  generateMaze() {
+  }
+
+  generateMazeAnim() {
+
+  }
+}
+
+class BinaryMaze extends Maze {
+  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
+    super(height, width, scale)
+    this.dir = dir
   }
 
   initGrid() {
@@ -367,6 +391,8 @@ class BinaryMaze {
   }
 
   draw() {
+    this.canvas.setColor('#FFF')
+    this.canvas.drawBackground()
     this.drawGrid()
     if (this.animating) {
       if (this.generateMazeAnim(this.x, this.y)) {
@@ -376,9 +402,6 @@ class BinaryMaze {
   }
 
   drawGrid() {
-    this.canvas.setColor('#FFF')
-    this.canvas.drawBackground()
-
     this.grid.forEach((col, y) => {
       col.forEach((color, x) => {
         const [hor, vert] = color
@@ -451,30 +474,139 @@ class BinaryMaze {
   }
 }
 
-class Maze {
+class BinaryMazeBlock extends Maze {
   constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
-    this.height = height
-    this.width = width
-    this.scale = scale
-    this.canvas = new Canvas(width, height)
-    this.grid = []
-    this.x = 0
-    this.y = 0
+    super(height, width, scale)
     this.dir = dir
+  }
 
-    this.animating = false
+  initGrid() {
+    for (let y = 0; y < this.height / this.scale; y++) {
+      if (!this.grid[y]) this.grid[y] = []
+      for (let x = 0; x < this.width / this.scale; x++) {
+        if (x === 0 || y === 0 || x === this.width / this.scale - 1|| y === this.height / this.scale - 1) {
+          this.grid[y].push(0)
+        } else {
+          let color = 0
+          if (x % 2 === 1 && y % 2 === 1) color = 0
+          this.grid[y].push(color)
+        }
+      }
+    }
+  }
 
-    this.initGrid()
-    this.canvas.loop(() => {
-      this.draw(this)
+  draw() {
+    this.canvas.setColor('#FFF')
+    this.canvas.drawBackground()
+    this.drawGrid()
+    if (this.animating) {
+      if (this.generateMazeAnim(this.x, this.y)) {
+        this.animating = false
+      }
+    }
+  }
+
+  drawGrid() {
+    this.grid.forEach((col, y) => {
+      col.forEach((color, x) => {
+        const c = color === 1 ? "#FFF" : "#000"
+        this.canvas.setColor(c)
+        this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
+      })
     })
   }
 
+  generateMaze() {
+    const dy = this.dir.includes('N') ? -1 : 1
+    const dx = this.dir.includes('W') ? -1 : 1
+    const oy = dy === -1 ? this.height / this.scale - 2 : 1
+    const ox = dx === -1 ? this.width / this.scale  - 2 : 1
 
-  initGrid() {
-    console.log("ininting")
+    if (Math.random() < 0.5) this.grid[oy - dy][ox] = 1
+    else this.grid[oy][ox - dx] = 1
+
+    for (let y = 0; y < this.height / this.scale; y++) {
+      for (let x = 0; x < this.width / this.scale; x++) {
+        if (x === 0 || y === 0 || x === this.width / this.scale - 1|| y === this.height / this.scale - 1) continue
+        if (x % 2 === 0 || y % 2 === 0) continue
+
+        this.grid[y][x] = 1
+        if (Math.random() < 0.5) {
+          try {
+            this.grid[y + dy][x] = 1
+          } catch {}
+        } else {
+          try {
+            this.grid[y][x + dx] = 1
+          } catch {}
+      }
+
+    }
+  }
+  }
+
+  generateMazeAnim(xc = this.x, yc = this.y) {
+    if (this.animating == false) this.animating = true
+    const dy = this.dir.includes('N') ? -1 : 1
+    const dx = this.dir.includes('W') ? -1 : 1
+    
+    const oy = dy === -1 ? this.height / this.scale - 2 : 1
+    const ox = dx === -1 ? this.width / this.scale  - 2 : 1
+    if (xc === ox && yc === oy) {
+  
+      if (Math.random() < 0.5) this.grid[oy - dy][ox] = 1
+      else this.grid[oy][ox - dx] = 1
+    }
+
+    if (this.x === 0 || this.y === 0 || this.x === this.width / this.scale - 1|| this.y === this.height / this.scale - 1) {
+      this.y++
+      if (this.y === this.height / this.scale) {
+        this.y = 0
+        this.x++
+        if (this.x === this.width / this.scale) {
+          return true
+        }
+      }
+      return
+    }
+
+    if (this.x % 2 === 0 || this.y % 2 === 0) {
+      this.y++
+      if (this.y === this.height / this.scale) {
+        this.y = 0
+        this.x++
+        if (this.x === this.width / this.scale) {
+          return true
+        }
+      }
+      return
+    }
+
+    this.grid[this.y][this.x] = 1
+    if (Math.random() < 0.5) {
+      try {
+        this.grid[this.y + dy][this.x] = 1
+      } catch {}
+    } else {
+      try {
+        this.grid[this.y][this.x + dx] = 1
+      } catch {}
+  }
+
+  this.y++
+  if (this.y === this.height / this.scale - 1) {
+    this.y = 0
+    this.x++
+    if (this.x === this.width / this.scale - 1) {
+      this.x = 0
+      this.y = 0
+      return true
+    }
+  }
+
   }
 }
 
-const grid = new BinaryMaze('SW')
+
+const grid = new BinaryMaze('SE', 500, 500, 20)
 grid.generateMaze()
