@@ -22,7 +22,6 @@ class Canvas {
     this.strokeColor = '#000'
     this.ctx.strokeStyle = '#000'
 
-
     this.strokeWeight = 2
     this.ctx.lineWidth = 2
 
@@ -88,7 +87,7 @@ class Canvas {
   drawRectangle(x, y, width, height, noFill) {
     this.ctx.beginPath()
     this.ctx.rect(x, y, width, height)
-    if (!noFill) this.ctx.fill() 
+    if (!noFill) this.ctx.fill()
     else this.ctx.stroke()
   }
 
@@ -128,8 +127,8 @@ class Canvas {
 
     let dx = sides[3] ? 1 : 0
     let dy = sides[0] ? 1 : 0
-    let dwidth = sides[1] ? (-dx - 1) : -dx
-    let dheight = sides[2] ? (-dy - 1) : -dy
+    let dwidth = sides[1] ? -dx - 1 : -dx
+    let dheight = sides[2] ? -dy - 1 : -dy
 
     this.setColor('#fff')
     this.drawRectangle(x + dx, y + dy, width + dwidth, height + dheight, false)
@@ -145,9 +144,9 @@ class Canvas {
    * @param {Number} y3 The y-codinate (from the top-left corner)
    * @param {Number} x4 The x-codinate (from the bottom-left corner)
    * @param {Number} y4 The y-codinate (from the top-left corner)
-   * @param {Boolean} noFill 
+   * @param {Boolean} noFill
    */
-  drawQuadrilateral (x1, y1, x2, y2, x3, y3, x4, y4, noFill) {
+  drawQuadrilateral(x1, y1, x2, y2, x3, y3, x4, y4, noFill) {
     this.ctx.beginPath()
     this.ctx.moveTo(x1, y1)
     this.ctx.lineTo(x2, y2)
@@ -199,7 +198,7 @@ class Canvas {
   drawCircle(x, y, radius, noFill) {
     this.ctx.beginPath()
     this.ctx.arc(x, y, radius, 0, 2 * Math.PI)
-    if (!noFill) this.ctx.fill() 
+    if (!noFill) this.ctx.fill()
     else this.ctx.stroke()
   }
 
@@ -230,7 +229,6 @@ class Canvas {
    * @param  {HTMLImageElement} image The element
    */
   drawImage(image, x, y, height, width) {
-
     function draw() {
       this.ctx.drawImage(image, x, y, height, width)
     }
@@ -279,8 +277,9 @@ class Canvas {
       angle += 0.01
     }
 
-    if (!noFill) this.ctx.fill() 
-    else this.ctx.stroke()  }
+    if (!noFill) this.ctx.fill()
+    else this.ctx.stroke()
+  }
 
   /**
    * Draws a heart with a solid color
@@ -306,8 +305,8 @@ class Canvas {
    * Changes the color when drawing filled shapes
    * @param  {String} color The color in any CSS legal Color values
    */
-  setColor(color) { 
-    this.color = color 
+  setColor(color) {
+    this.color = color
     this.ctx.fillStyle = color
   }
 
@@ -315,8 +314,8 @@ class Canvas {
    * Changes the color of the outline when drawing outlined shapes
    * @param  {String} strokeColor The color in any CSS legal Color values
    */
-  setStrokeColor(strokeColor) { 
-    this.strokeColor = strokeColor 
+  setStrokeColor(strokeColor) {
+    this.strokeColor = strokeColor
     this.ctx.strokeStyle = strokeColor
   }
 
@@ -333,13 +332,13 @@ class Canvas {
    * Changes the framerate of the looped function
    * @param  {Number} frameRate The frameRate
    */
-  setFrameRate(frameRate) { this.frameRate = frameRate}
-
+  setFrameRate(frameRate) {
+    this.frameRate = frameRate
+  }
 }
 
-
 class BinaryMaze {
-  constructor(height = 500, width = 500, scale = 20) {
+  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
     this.height = height
     this.width = width
     this.scale = scale
@@ -347,10 +346,16 @@ class BinaryMaze {
     this.grid = []
     this.x = 0
     this.y = 0
-
+    this.dir = dir
 
     this.animating = false
+    this.initGrid()
+    this.canvas.loop(() => {
+      this.draw(this)
+    })
+  }
 
+  initGrid() {
     for (let y = 0; y <= this.height / this.scale; y++) {
       if (!this.grid[y]) this.grid[y] = []
       for (let x = 0; x <= this.width / this.scale; x++) {
@@ -359,15 +364,13 @@ class BinaryMaze {
         this.grid[y].push([hor, vert])
       }
     }
-
-    this.canvas.loop(() => {this.draw(this)})
   }
-  
+
   draw() {
     this.drawGrid()
     if (this.animating) {
-      if (this.generateMazeAnim(this.x, this.y)) {        
-        this.canvas.noLoop(draw)
+      if (this.generateMazeAnim(this.x, this.y)) {
+        this.animating = false
       }
     }
   }
@@ -390,101 +393,88 @@ class BinaryMaze {
   }
 
   generateMaze() {
+    const dy = this.dir.includes('N') ? 0 : 1
+    const dx = this.dir.includes('W') ? 0 : 1
+    const oy = dy === 0 ? this.height / this.scale - 1: 0
+    const ox = dx === 0 ? this.width / this.scale  - 1 : 0
+
+    this.grid[oy + (dy === 0 ? 1 : 0)][ox][0] = false
+    this.grid[oy][ox + (dx === 0 ? 1 : 0)][1] = false
+
     this.grid.forEach((col, y) => {
       col.forEach((color, x) => {
         if (Math.random() < 0.5) {
-          this.grid[y][x][0] = false
+          try {
+            this.grid[y + dy][x][0] = false
+          } catch {}
         } else {
-          this.grid[y][x][1] = false
+          try {
+            this.grid[y][x + dx][1] = false
+          } catch {}
         }
       })
-    }) 
+    })
   }
 
-  
   generateMazeAnim(xc = this.x, yc = this.y) {
     if (this.animating == false) this.animating = true
-    if (Math.random() < 0.5) {this.grid[yc][xc][0] = false} 
-    else {this.grid[yc][xc][1] = false}
-      this.y++
-    
-      if (this.y === this.height / this.scale) {
-        this.y = 0
-        this.x++
-        if (this.x === this.width / this.scale) {return true}
+    const dy = this.dir.includes('N') ? 0 : 1
+    const dx = this.dir.includes('W') ? 0 : 1
+
+    if (xc === 0 && yc === 0) {
+      const oy = dy === 0 ? this.height / this.scale - 1: 0
+      const ox = dx === 0 ? this.width / this.scale  - 1 : 0
+  
+      this.grid[oy + (dy === 0 ? 1 : 0)][ox][0] = false
+      this.grid[oy][ox + (dx === 0 ? 1 : 0)][1] = falsee
+    }
+
+    if (Math.random() < 0.5) {
+      try {
+        this.grid[yc + dy][xc][0] = false
+      } catch {}
+    } else {
+      try {
+        this.grid[yc][xc + dx][1] = false
+      } catch {}
+    }
+
+    this.y++
+
+    if (this.y === this.height / this.scale) {
+      this.y = 0
+      this.x++
+      if (this.x === this.width / this.scale) {
+        return true
       }
+    }
   }
 }
-//
-//const HEIGHT = 500
-//const WIDTH = 500
-//const SCALE = 20
-//const canvas = new Canvas(WIDTH + 10, HEIGHT + 10)
-//const terrain = []
-//
-//let x = 0
-//let y = 0
-//
-//for (let y = 0; y <= HEIGHT / SCALE; y++) {
-//  if (!terrain[y]) terrain[y] = []
-//  for (let x = 0; x <= WIDTH / SCALE; x++) {
-//    let hor = x === WIDTH / SCALE ? false : true
-//    let vert = y === HEIGHT / SCALE ? false : true
-//    terrain[y].push([hor, vert])
-//  }
-//}
-//
-//function draw() {
-//  canvas.setColor('#FFF')
-//  canvas.drawBackground()
-//
-//  terrain.forEach((col, y) => {
-//    col.forEach((color, x) => {
-//      const [hor, vert] = color
-//      let sx = x * SCALE
-//      let sy = y * SCALE
-//      let sx2 = (x + 1) * SCALE
-//      let sy2 = (y + 1) * SCALE
-//      if (hor) canvas.drawLine(sx, sy, sx2, sy)
-//      if (vert) canvas.drawLine(sx, sy, sx, sy2)
-//    })
-//  })
-//  if (drawMazeAnimate(x, y)) {
-//    canvas.noLoop(draw)
-//  }
-//}
-//
-//function drawMazeAnimate(xc, yc) {
-//  if (Math.random() < 0.5) {
-//    terrain[yc][xc][0] = false
-//    } else {
-//      terrain[yc][xc][1] = false
-//    }
-//  
-//    y++
-//    if (y === HEIGHT / SCALE) {
-//      y = 0
-//      x++
-//
-//      if (x === WIDTH / SCALE) {
-//        return true
-//      }
-//    }
-//}
-//
-//function drawMaze() {
-//  terrain.forEach((col, y) => {
-//    col.forEach((color, x) => {
-//      if (Math.random() < 0.5) {
-//        terrain[y][x][0] = false
-//      } else {
-//        terrain[y][x][1] = false
-//      }
-//    })
-//  }) 
-//}
-//
-//canvas.loop(draw)
+
+class Maze {
+  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
+    this.height = height
+    this.width = width
+    this.scale = scale
+    this.canvas = new Canvas(width, height)
+    this.grid = []
+    this.x = 0
+    this.y = 0
+    this.dir = dir
+
+    this.animating = false
+
+    this.initGrid()
+    this.canvas.loop(() => {
+      this.draw(this)
+    })
+  }
 
 
-const grid = new BinaryMaze()
+  initGrid() {
+    console.log("ininting")
+  }
+}
+
+const grid = new BinaryMaze('SW')
+grid.generateMaze()
