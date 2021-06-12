@@ -421,21 +421,41 @@ class Maze {
   }
 
   scanForUnvisited(visited) {
+    const directions = [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+    ]
+
+    for (let t = directions.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = directions[t]
+      directions[t] = directions[j]
+      directions[j] = temp
+    }
+
     for (let y = 0; y < this.height / this.scale; y++) {
       for (let x = 0; x < this.width / this.scale; x++) {
         if (!visited.has(x + ',' + y)) {
-          if (
-            (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
-            (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
-            && (visited.has(x - 1 + ',' + y) || x === 0)
-            && (visited.has(x + ',' + (y - 1)) || y === 0)
-          ) {
-            let [dx, dy] = this.randomDirection()
-            //this.removeEdge(x, y, dx, dy)
-            visited.add(x + ',' + y)
-            continue
+          
+          for (let i = 0; i < directions.length; i++) {
+            const [dx, dy] = directions[i]
+            if (visited.has((x + dx) + ',' + (y + dy))) {
+              visited.add(x + ',' + y)
+              this.removeEdge(x, y, dx, dy)
+              if (
+                (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
+                (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
+                && (visited.has(x - 1 + ',' + y) || x === 0)
+                && (visited.has(x + ',' + (y - 1)) || y === 0)
+              ) {
+                return this.scanForUnvisited(visited)
+              }
+              return [x, y]
+            }
           }
-          return [x,y]
+
         }
       }
     }
@@ -1016,7 +1036,6 @@ class HAKMaze extends Maze {
           console.log(visited)
           return
         }
-        visited.add(x + ',' + y)
       }
 
 
