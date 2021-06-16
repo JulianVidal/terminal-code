@@ -373,8 +373,12 @@ class Maze {
     if (this.animating) {
       if (this.generateMazeAnim(this.x, this.y)) {
         this.animating = false
+        this.canvas.noLoop()
       }
     }
+    this.canvas.setColor('#FFF')
+    this.canvas.drawBackground()
+    this.drawGrid()
   }
 
   drawGrid() {
@@ -438,7 +442,6 @@ class Maze {
     for (let y = 0; y < this.height / this.scale; y++) {
       for (let x = 0; x < this.width / this.scale; x++) {
         if (!visited.has(x + ',' + y)) {
-          
           for (let i = 0; i < directions.length; i++) {
             const [dx, dy] = directions[i]
             if (visited.has((x + dx) + ',' + (y + dy))) {
@@ -455,7 +458,6 @@ class Maze {
               return [x, y]
             }
           }
-
         }
       }
     }
@@ -501,8 +503,12 @@ class MazeBlock extends Maze {
     if (this.animating) {
       if (this.generateMazeAnim(this.x, this.y)) {
         this.animating = false
+        this.canvas.noLoop()
       }
     }
+    this.canvas.setColor('#000')
+    this.canvas.drawBackground()
+    this.drawGrid()
   }
 
   drawGrid() {
@@ -551,6 +557,46 @@ class MazeBlock extends Maze {
 
     return [dx, dy]
   }
+  scanForUnvisited(visited) {
+    const directions = [
+      [0, 2],
+      [2, 0],
+      [0, -2],
+      [-2, 0],
+    ]
+
+    for (let t = directions.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = directions[t]
+      directions[t] = directions[j]
+      directions[j] = temp
+    }
+
+    for (let y = 1; y < this.height / this.scale; y += 2) {
+      for (let x = 1; x < this.width / this.scale; x += 2) {
+        if (!visited.has(x + ',' + y)) {
+          for (let i = 0; i < directions.length; i++) {
+            const [dx, dy] = directions[i]
+            if (visited.has((x + dx) + ',' + (y + dy))) {
+              this.grid[y][x] = 1
+              visited.add(x + ',' + y)
+              this.removeEdge(x, y, dx / 2, dy / 2)
+              if (
+                (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+                (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
+                && (visited.has(x - 2 + ',' + y) || x === 1)
+                && (visited.has(x + ',' + (y - 2)) || y === 1)
+              ) {
+                return this.scanForUnvisited(visited)
+              }
+              return [x, y]
+            }
+          }
+        }
+      }
+    }
+    return [null, null]
+  } 
 }
 
 class BinaryMaze extends Maze {
@@ -561,8 +607,8 @@ class BinaryMaze extends Maze {
   }
 
   generateMaze() {
-    for (let y = 0; y < this.grid.length; y++) {
-      for (let x = 0; x < this.grid[y].length; x++) {
+    for (let y = 0; y < this.grid.length - 1; y++) {
+      for (let x = 0; x < this.grid[y].length - 1; x++) {
         if (Math.random() < 0.5) this.removeEdge(x, y, 0, this.dy)
         else this.removeEdge(x, y, this.dx, 0)
       }
@@ -594,6 +640,7 @@ class BinaryMazeBlock extends MazeBlock {
   generateMaze() {
     for (let y = 1; y < this.height / this.scale; y += 2) {
       for (let x = 1; x < this.width / this.scale; x += 2) {
+        this.grid[y][x] = 1
         if (Math.random() < 0.5) this.removeEdge(x, y, 0, this.dy)
         else this.removeEdge(x, y, this.dx, 0)
       }
@@ -1058,10 +1105,324 @@ class HAKMaze extends Maze {
 
     }
   }
+
+  generateMazeAnim() {
+    if (this.animating == false) this.animating = true
+
+    if (
+      (this.visited.has(this.x + 1 + ',' + this.y) || this.x === this.width / this.scale - 1) &&
+      (this.visited.has(this.x + ',' + (this.y + 1)) || this.y === this.height / this.scale - 1)
+      && (this.visited.has(this.x - 1 + ',' + this.y) || this.x === 0)
+      && (this.visited.has(this.x + ',' + (this.y - 1)) || this.y === 0)
+    ) {
+      let cords = this.scanForUnvisited(this.visited)
+      this.x = cords[0]
+      this.y = cords[1]
+
+      if (this.x === null) {
+        console.log(this.visited)
+        return true
+      }
+    }
+
+    let [dx, dy] = this.randomDirection()
+
+    while (
+      this.y + dy < 0 ||
+      this.x + dx < 0 ||
+      this.y + dy >= this.height / this.scale ||
+      this.x + dx >= this.width / this.scale ||
+      this.visited.has(this.x + dx + ',' + (this.y + dy))
+    ) {
+      [dx, dy] = this.randomDirection()
+    }
+
+    this.x += dx
+    this.y += dy
+    this.visited.add(this.x + ',' + this.y)
+    this.removeEdge(this.x, this.y, -dx, -dy)
+  }
 }
 
-const grid = new HAKMaze(500, 500, 20)
-grid.generateMaze()
+class HAKMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    const cords = this.randomCord()
+    this.x = cords[0]
+    this.y = cords[1]
+
+    this.visited = new Set()
+    this.visited.add(this.x + ',' + this.y)
+  }
+
+  generateMaze() {
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    visited.add(x + ',' + y)
+
+    while (true) {
+      this.grid[y][x] = 1
+
+      if (
+        (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+        (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
+        && (visited.has(x - 2 + ',' + y) || x === 1)
+        && (visited.has(x + ',' + (y - 2)) || y === 1)
+      ) {
+        [x, y] = this.scanForUnvisited(visited)
+        if (x === null) {
+          console.log(visited)
+          return
+        }
+      }
+
+
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        visited.has(x + dx + ',' + (y + dy))
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+      visited.add(x + ',' + y)
+      this.removeEdge(x, y, -dx / 2, -dy / 2)
+
+    }
+  }
+
+  generateMazeAnim() {
+    this.grid[this.y][this.x] = 1
+    if (this.animating == false) this.animating = true
+
+    if (
+      (this.visited.has(this.x + 2 + ',' + this.y) || this.x === this.width / this.scale - 2) &&
+      (this.visited.has(this.x + ',' + (this.y + 2)) || this.y === this.height / this.scale - 2)
+      && (this.visited.has(this.x - 2 + ',' + this.y) || this.x === 1)
+      && (this.visited.has(this.x + ',' + (this.y - 2)) || this.y === 1)
+    ) {
+      let cords = this.scanForUnvisited(this.visited)
+      this.x = cords[0]
+      this.y = cords[1]
+
+      if (this.x === null) {
+        console.log(this.visited)
+        return true
+      }
+    this.grid[this.y][this.x] = 1
+    }
+
+    let [dx, dy] = this.randomDirection()
+
+    while (
+      this.y + dy < 0 ||
+      this.x + dx < 0 ||
+      this.y + dy >= this.height / this.scale ||
+      this.x + dx >= this.width / this.scale ||
+      this.visited.has(this.x + dx + ',' + (this.y + dy))
+    ) {
+      [dx, dy] = this.randomDirection()
+    }
+
+    this.x += dx
+    this.y += dy
+    this.visited.add(this.x + ',' + this.y)
+    this.removeEdge(this.x, this.y, -dx / 2, -dy / 2)
+  }
+}
+
+class SWMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    this.run = []
+  }
+
+  generateMaze() {
+    const run = []
+    for (let y = 0; y < this.grid.length - 1; y++) {
+      for (let x = 0; x < this.grid[y].length - 1; x++) {
+        run.push([x, y])
+        if (Math.random() < 0.5) {
+          this.removeEdge(x, y, 1, 0)
+        } else {
+          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+          this.removeEdge(rx, ry, 0, -1)
+          run.length = 0
+        }
+      }
+      if (run.length > 0) {
+        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+        this.removeEdge(rx, ry, 0, -1)
+      }
+      if (run.length > 0) {
+        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+        this.removeEdge(rx, ry, 0, -1)
+      }
+      run.length = 0
+    }
+  }
+
+  generateMazeAnim() {
+    if (this.animating == false) this.animating = true
+
+    this.run.push([this.x, this.y])
+    if (Math.random() < 0.5) {
+      this.removeEdge(this.x, this.y, 1, 0)
+    } else {
+      const [rx, ry] = this.run[Math.floor(Math.random() * this.run.length)]
+      this.removeEdge(rx, ry, 0, -1)
+      this.run.length = 0
+    }
+
+    if (this.y === this.grid.length - 1) return true
+    this.x++
+    if (this.x === this.grid[this.y].length - 1) {
+      if (this.run.length > 0) {
+        const [rx, ry] = this.run[Math.floor(Math.random() * this.run.length)]
+        this.removeEdge(rx, ry, 0, -1)
+      }
+      this.run.length = 0
+      this.x = 0
+      this.y++
+    }
+  }
+}
+
+class SWMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    this.run = []
+  }
+
+  generateMaze() {
+    const run = []
+    for (let y = 1; y < this.height / this.scale; y += 2) {
+      for (let x = 1; x < this.width / this.scale; x += 2) {
+        this.grid[y][x] = 1
+        run.push([x, y])
+        if (Math.random() < 0.5) {
+          this.removeEdge(x, y, 1, 0)
+        } else {
+          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+          this.removeEdge(rx, ry, 0, -1)
+          run.length = 0
+        }
+      }
+      if (run.length > 0) {
+        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+        this.removeEdge(rx, ry, 0, -1)
+      }
+      run.length = 0
+    }
+  }
+
+  generateMazeAnim() {
+    if (this.animating == false) this.animating = true
+    this.grid[this.y][this.x] = 1
+    this.run.push([this.x, this.y])
+    if (Math.random() < 0.5) {
+      this.removeEdge(this.x, this.y, 1, 0)
+    } else {
+      const [rx, ry] = this.run[Math.floor(Math.random() * this.run.length)]
+      this.removeEdge(rx, ry, 0, -1)
+      this.run.length = 0
+    }
+
+    this.x += 2
+    if (this.x === this.width / this.scale) {
+      if (this.run.length > 0) {
+        const [rx, ry] = this.run[Math.floor(Math.random() * this.run.length)]
+        this.removeEdge(rx, ry, 0, -1)
+      }
+      this.run.length = 0
+      this.x = 1
+      this.y += 2
+      if (this.y === this.height / this.scale) return true
+    }
+  }
+}
+
+class RDMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+  initGrid() {
+    for (let y = 0; y <= this.height / this.scale; y++) {
+      if (!this.grid[y]) this.grid[y] = []
+      for (let x = 0; x <= this.width / this.scale; x++) {
+        let hor = x === this.width / this.scale || x === 0 ? true : false
+        let vert = y === this.height / this.scale || y === 0 ? true : false
+        this.grid[y].push([vert, hor])
+      }
+    }
+  }
+
+  generateMazeRec(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
+    if (Math.random() < 0.5) {
+      const y3 = this.splitHor(x1, x2, y1, y2)
+
+      if (!y3) {
+        return
+      } 
+
+      this.generateMazeRec(x1, x2, y1, y3)
+      this.generateMazeRec(x1, x2, y3, y2)
+    } else {
+      const x3 = this.splitVert(x1, x2, y1, y2)
+
+      if (!x3) {
+        return
+      }
+
+      this.generateMazeRec(x1, x3, y1, y2)
+      this.generateMazeRec(x3, x2, y1, y2)
+    }
+  }
+
+  splitHor(x1, x2, y1, y2) {
+    const y = Math.floor((y2 - y1) / 2) + y1
+
+    if (Math.floor((y2 - y1) / 2) < 1) return null
+
+    for (let x = x1; x < x2; x++) {
+      this.grid[y][x][0] = true
+    } 
+    this.grid[y][Math.floor(Math.random() * (x2 - x1) + x1)][0] = false
+    return y
+  }
+
+  splitVert(x1, x2, y1, y2) {
+    const x = Math.floor((x2 - x1) / 2) + x1
+    
+    if (Math.floor((x2 - x1) / 2) < 1) return null
+    
+    for (let y = y1; y < y2; y++) {
+      this.grid[y][x][1] = true
+    } 
+
+    this.grid[Math.floor(Math.random() * (y2 - y1) + y1)][x][1] = false
+    return x
+  }
+
+}
+
+const grid = new RDMaze(500, 500, 50)
+grid.generateMazeRec()
+
+//const gridSWB = new SWMazeBlock(500, 500, 20)
+//const gridSW = new SWMaze(500, 500, 20)
+
+//gridSW.generateMazeAnim()
+//gridSWB.generateMazeAnim()
 
 //const gridBB = new BinaryMazeBlock("NE", 500, 500, 20)
 //const gridB = new BinaryMaze("NE", 500, 500, 20)
@@ -1080,3 +1441,9 @@ grid.generateMaze()
 
 //gridRBB.generateMazeAnim()
 //gridRB.generateMazeAnim()
+
+//const gridHAKB = new HAKMazeBlock(500, 500, 20)
+//const gridHAK = new HAKMaze(500, 500, 20)
+
+//gridHAK.generateMazeAnim()
+//gridHAKB .generateMazeAnim()
