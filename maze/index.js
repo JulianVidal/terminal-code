@@ -489,7 +489,7 @@ class MazeBlock extends Maze {
           this.grid[y].push(0)
         } else {
           let color = 0
-          if (x % 2 === 1 && y % 2 === 1) color = 0
+          if (x % 2 === 1 && y % 2 === 1) color = 1
           this.grid[y].push(color)
         }
       }
@@ -1393,20 +1393,20 @@ class RDMaze extends Maze {
     if (prob === 0.5) prob = Math.random()
     if (0.5 < prob) {
       const y3 = this.splitHor(x1, x2, y1, y2)
-      await new Promise(resolve => setTimeout(resolve, 100));
 
       if (y3 === null || x2 - x1 <= 1) return
-
-      await this.generateMazeRec(x1, x2, y1, y3)
-      await this.generateMazeRec(x1, x2, y3, y2)
-    } else {
-      const x3 = this.splitVert(x1, x2, y1, y2)
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (x3 === null || y2 - y1 <= 1) return
+      await this.generateMazeRecAnim(x1, x2, y1, y3)
+      await this.generateMazeRecAnim(x1, x2, y3, y2)
+    } else {
+      const x3 = this.splitVert(x1, x2, y1, y2)
 
-      await this.generateMazeRec(x1, x3, y1, y2)
-      await this.generateMazeRec(x3, x2, y1, y2)
+      if (x3 === null || y2 - y1 <= 1) return
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      await this.generateMazeRecAnim(x1, x3, y1, y2)
+      await this.generateMazeRecAnim(x3, x2, y1, y2)
     }
   }
 
@@ -1443,36 +1443,80 @@ class RDMazeBlock extends MazeBlock {
   constructor(height, width, scale) {
     super(height, width, scale)
   }
+
   initGrid() {
-    for (let y = 0; y <= this.height / this.scale; y++) {
+    for (let y = 0; y < this.height / this.scale; y++) {
       if (!this.grid[y]) this.grid[y] = []
-      for (let x = 0; x <= this.width / this.scale; x++) {
-        let hor = x === this.width / this.scale || x === 0 ? true : false
-        let vert = y === this.height / this.scale || y === 0 ? true : false
-        this.grid[y].push([vert, hor])
+      for (let x = 0; x < this.width / this.scale; x++) {
+        if (
+          x === 0 ||
+          y === 0 ||
+          x === this.width / this.scale - 1 ||
+          y === this.height / this.scale - 1
+        ) {
+          this.grid[y].push(0)
+        } else {
+          let color = 1
+          if (x % 2 === 1 && y % 2 === 1) color = 1
+          this.grid[y].push(color)
+        }
       }
     }
-  }
-  
+  } 
+
   generateMazeRec(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
-    const wh = x2 - x1 + y2 - y1 
+    const wh = (x2 - x1 + y2 - y1)
     let prob = (y2 - y1) / wh
+
     if (prob === 0.5) prob = Math.random()
     if (0.5 < prob) {
       const y3 = this.splitHor(x1, x2, y1, y2)
 
-      if (y3 === null || x2 - x1 <= 1) return
+      if (y3 === null || (x2 - x1) / 2 <= 1) return
 
-      this.generateMazeRec(x1, x2, y1, y3)
-      this.generateMazeRec(x1, x2, y3, y2)
+      this.generateMazeRecAnim(x1, x2, y1, y3)
+      this.generateMazeRecAnim(x1, x2, y3, y2)
     } else {
       const x3 = this.splitVert(x1, x2, y1, y2)
 
-      if (x3 === null || y2 - y1 <= 1) return
+      if (x3 === null || (y2 - y1) / 2 <= 1) return
 
-      this.generateMazeRec(x1, x3, y1, y2)
-      this.generateMazeRec(x3, x2, y1, y2)
+      this.generateMazeRecAnim(x1, x3, y1, y2)
+      this.generateMazeRecAnim(x3, x2, y1, y2)
     }
+  }
+
+
+  splitHor(x1, x2, y1, y2) {
+    let y = Math.floor((y2 - y1) / 2) + y1
+    y += y % 2
+
+    if (Math.floor((y2 - y1) / 2) <= 1) return null
+
+    for (let x = x1; x < x2; x++) {
+      this.grid[y][x] = 0
+    } 
+    let x = Math.floor(Math.random() * (x2 - x1) + x1) 
+    x += 1 - (x % 2)
+    this.grid[y][x] = 1
+    this.draw()
+    return y
+  }
+
+  splitVert(x1, x2, y1, y2) {
+    let x = Math.floor((x2 - x1) / 2) + x1
+    x += x % 2
+    
+    if (Math.floor((x2 - x1) / 2) <= 1) return null
+    
+    for (let y = y1; y < y2; y++) {
+      this.grid[y][x] = 0
+    } 
+    let y = Math.floor(Math.random() * (y2 - y1) + y1) 
+    y += 1 - (y % 2)
+    this.grid[y][x] = 1
+    this.draw()
+    return x
   }
 
   async generateMazeRecAnim(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
@@ -1481,54 +1525,26 @@ class RDMazeBlock extends MazeBlock {
     if (prob === 0.5) prob = Math.random()
     if (0.5 < prob) {
       const y3 = this.splitHor(x1, x2, y1, y2)
+
+      if (y3 === null || (x2 - x1) / 2 <= 1) return
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (y3 === null || x2 - x1 <= 1) return
-
-      await this.generateMazeRec(x1, x2, y1, y3)
-      await this.generateMazeRec(x1, x2, y3, y2)
+      await this.generateMazeRecAnim(x1, x2, y1, y3)
+      await this.generateMazeRecAnim(x1, x2, y3, y2)
     } else {
       const x3 = this.splitVert(x1, x2, y1, y2)
+
+      if (x3 === null || (y2 - y1) / 2 <= 1) return
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (x3 === null || y2 - y1 <= 1) return
-
-      await this.generateMazeRec(x1, x3, y1, y2)
-      await this.generateMazeRec(x3, x2, y1, y2)
+      await this.generateMazeRecAnim(x1, x3, y1, y2)
+      await this.generateMazeRecAnim(x3, x2, y1, y2)
     }
   }
-
-  splitHor(x1, x2, y1, y2) {
-    const y = Math.floor((y2 - y1) / 2) + y1
-
-    if (Math.floor((y2 - y1) / 2) < 1) return null
-
-    for (let x = x1; x < x2; x++) {
-      this.grid[y][x][0] = true
-    } 
-    this.grid[y][Math.floor(Math.random() * (x2 - x1) + x1)][0] = false
-    this.draw()
-    return y
-  }
-
-  splitVert(x1, x2, y1, y2) {
-    const x = Math.floor((x2 - x1) / 2) + x1
-    
-    if (Math.floor((x2 - x1) / 2) < 1) return null
-    
-    for (let y = y1; y < y2; y++) {
-      this.grid[y][x][1] = true
-    } 
-
-    this.grid[Math.floor(Math.random() * (y2 - y1) + y1)][x][1] = false
-    this.draw()
-    return x
-  }
-
 }
 
-const grid = new RDMazeBlock(500, 500, 50)
-grid.generateMazeRec()
+const grid = new RDMaze(500, 500, 20)
+grid.generateMazeRecAnim()
 
 //const gridSWB = new SWMazeBlock(500, 500, 20)
 //const gridSW = new SWMaze(500, 500, 20)
