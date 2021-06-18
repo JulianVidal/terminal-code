@@ -531,6 +531,7 @@ class MazeBlock extends Maze {
   generateMazeAnim() {}
 
   removeEdge(x, y, dx, dy) {
+    this.grid[y][x] = 1
     this.grid[y + dy][x + dx] = 1
   }
 
@@ -640,7 +641,6 @@ class BinaryMazeBlock extends MazeBlock {
   generateMaze() {
     for (let y = 1; y < this.height / this.scale; y += 2) {
       for (let x = 1; x < this.width / this.scale; x += 2) {
-        this.grid[y][x] = 1
         if (Math.random() < 0.5) this.removeEdge(x, y, 0, this.dy)
         else this.removeEdge(x, y, this.dx, 0)
       }
@@ -1474,15 +1474,15 @@ class RDMazeBlock extends MazeBlock {
 
       if (y3 === null || (x2 - x1) / 2 <= 1) return
 
-      this.generateMazeRecAnim(x1, x2, y1, y3)
-      this.generateMazeRecAnim(x1, x2, y3, y2)
+      this.generateMazeRec(x1, x2, y1, y3)
+      this.generateMazeRec(x1, x2, y3, y2)
     } else {
       const x3 = this.splitVert(x1, x2, y1, y2)
 
       if (x3 === null || (y2 - y1) / 2 <= 1) return
 
-      this.generateMazeRecAnim(x1, x3, y1, y2)
-      this.generateMazeRecAnim(x3, x2, y1, y2)
+      this.generateMazeRec(x1, x3, y1, y2)
+      this.generateMazeRec(x3, x2, y1, y2)
     }
   }
 
@@ -1543,8 +1543,8 @@ class RDMazeBlock extends MazeBlock {
   }
 }
 
-const grid = new RDMaze(500, 500, 20)
-grid.generateMazeRecAnim()
+//const grid = new RDMaze(500, 500, 20)
+//grid.generateMazeRecAnim()
 
 //const gridSWB = new SWMazeBlock(500, 500, 20)
 //const gridSW = new SWMaze(500, 500, 20)
@@ -1575,3 +1575,45 @@ grid.generateMazeRecAnim()
 
 //gridHAK.generateMazeAnim()
 //gridHAKB .generateMazeAnim()
+
+//const gridRDB = new RDMazeBlock(500, 500, 20)
+//const gridRD = new RDMaze(500, 500, 20)
+
+//gridRD.generateMazeRecAnim()
+//gridRDB.generateMazeRecAnim()
+
+const gridBB = new BinaryMazeBlock("NE", 500, 500, 20)
+const gridB = new BinaryMaze("NE", 500, 500, 20)
+
+gridBB.generateMaze()
+gridB.generateMaze()
+
+const gridABB = new ABMazeBlock(500, 500, 20)
+const gridAB = new ABMaze(500, 500, 20)
+
+gridABB.generateMaze()
+gridAB.generateMaze()
+
+const gridRBB = new RBMazeBlock(500, 500, 20)
+const gridRB = new RBMaze(500, 500, 20)
+
+gridRBB.generateMaze()
+gridRB.generateMaze()
+
+const gridHAKB = new HAKMazeBlock(500, 500, 20)
+const gridHAK = new HAKMaze(500, 500, 20)
+
+gridHAK.generateMaze()
+gridHAKB .generateMaze()
+
+const gridSWB = new SWMazeBlock(500, 500, 20)
+const gridSW = new SWMaze(500, 500, 20)
+
+gridSW.generateMaze()
+gridSWB.generateMaze()
+
+const gridRDB = new RDMazeBlock(500, 500, 20)
+const gridRD = new RDMaze(500, 500, 20)
+
+gridRD.generateMazeRec()
+gridRDB.generateMazeRec()
