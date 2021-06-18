@@ -531,7 +531,6 @@ class MazeBlock extends Maze {
   generateMazeAnim() {}
 
   removeEdge(x, y, dx, dy) {
-    this.grid[y][x] = 1
     this.grid[y + dy][x + dx] = 1
   }
 
@@ -610,6 +609,7 @@ class BinaryMaze extends Maze {
   generateMaze() {
     for (let y = 0; y < this.grid.length - 1; y++) {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
+        this.grid[y][x] = 1
         if (Math.random() < 0.5) this.removeEdge(x, y, 0, this.dy)
         else this.removeEdge(x, y, this.dx, 0)
       }
