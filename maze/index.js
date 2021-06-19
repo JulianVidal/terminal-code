@@ -349,10 +349,10 @@ class Maze {
     this.instrs = []
     this.step = 0
     this.animating = false
+    this.initGrid()
   }
 
   initGrid() {
-    this.grid = []
     for (let y = 0; y <= this.height / this.scale; y++) {
       if (!this.grid[y]) this.grid[y] = []
       for (let x = 0; x <= this.width / this.scale; x++) {
@@ -364,8 +364,10 @@ class Maze {
   }
 
   reset() {
-    this.initGrid()
+    this.instrs.length = 0
     this.initInstrs()
+    this.grid = []
+    this.initGrid()
     this.animating = false
     this.canvas.noLoop()
   }
@@ -407,6 +409,7 @@ class Maze {
   }
 
   removeEdge(x, y, dx, dy) {
+    if (x === null) return
     const edgeSide = Math.abs(dx)
     dx = Math.max(0, dx)
     dy = Math.max(0, dy)
@@ -427,15 +430,9 @@ class Maze {
   }
 
   return [dx, dy]
-}
-
-  randomCord() {
-    const x = Math.floor(Math.random() * (this.width / this.scale - 1))
-    const y = Math.floor(Math.random() * (this.height / this.scale - 1))
-    return [x, y]
   }
 
-  scanForUnvisited(visited) {
+  randomDirections() {
     const directions = [
       [0, 1],
       [1, 0],
@@ -450,6 +447,18 @@ class Maze {
       directions[j] = temp
     }
 
+    return directions
+  }
+
+  randomCord() {
+    const x = Math.floor(Math.random() * (this.width / this.scale - 1))
+    const y = Math.floor(Math.random() * (this.height / this.scale - 1))
+    return [x, y]
+  }
+
+  scanForUnvisited(visited) {
+    const directions = this.randomDirections()
+
     for (let y = 0; y < this.height / this.scale; y++) {
       for (let x = 0; x < this.width / this.scale; x++) {
         if (!visited.has(x + ',' + y)) {
@@ -457,7 +466,7 @@ class Maze {
             const [dx, dy] = directions[i]
             if (visited.has((x + dx) + ',' + (y + dy))) {
               visited.add(x + ',' + y)
-              this.removeEdge(x, y, dx, dy)
+              this.instrs.push({x, y, dx, dy})
               if (
                 (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
                 (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
@@ -549,6 +558,7 @@ class MazeBlock extends Maze {
   }
 
   removeEdge(x, y, dx, dy) {
+    if (x === null) return
     this.grid[y + dy][x + dx] = 1
   }
 
@@ -575,7 +585,8 @@ class MazeBlock extends Maze {
 
     return [dx, dy]
   }
-  scanForUnvisited(visited) {
+
+  randomDirections() {
     const directions = [
       [0, 2],
       [2, 0],
@@ -590,19 +601,25 @@ class MazeBlock extends Maze {
       directions[j] = temp
     }
 
+    return directions
+  }
+
+  scanForUnvisited(visited) {
+  const directions = this.randomDirections()
+
     for (let y = 1; y < this.height / this.scale; y += 2) {
       for (let x = 1; x < this.width / this.scale; x += 2) {
         if (!visited.has(x + ',' + y)) {
           for (let i = 0; i < directions.length; i++) {
             const [dx, dy] = directions[i]
             if (visited.has((x + dx) + ',' + (y + dy))) {
-              this.grid[y][x] = 1
               visited.add(x + ',' + y)
-              this.removeEdge(x, y, dx / 2, dy / 2)
+              this.instrs.push({x, y, dx: 0, dy: 0})
+              this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
               if (
-                (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
-                (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
-                && (visited.has(x - 2 + ',' + y) || x === 1)
+                  (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+                  (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
+                  && (visited.has(x - 2 + ',' + y) || x === 1)
                 && (visited.has(x + ',' + (y - 2)) || y === 1)
               ) {
                 return this.scanForUnvisited(visited)
@@ -625,7 +642,6 @@ class BinaryMaze extends Maze {
   }
 
   initInstrs() {
-    this.instrs.length = 0
     const { dx, dy } = this
     for (let y = 0; y < this.grid.length - 1; y++) {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
@@ -645,7 +661,6 @@ class BinaryMazeBlock extends MazeBlock {
   }
 
   initInstrs() {
-    this.instrs.length = 0
     const { dx, dy } = this
     for (let y = 1; y < this.grid.length; y += 2) {
       for (let x = 1; x < this.grid[y].length; x += 2) {
@@ -657,18 +672,267 @@ class BinaryMazeBlock extends MazeBlock {
   }
 }
 
-const gridBB = new BinaryMazeBlock("NE", 500, 500, 20)
-const gridB = new BinaryMaze("NE", 500, 500, 20)
+class ABMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
 
-gridBB.generateMazeAnim()
-gridB.generateMazeAnim()
+    this.totalSize = (height / scale) * (width / scale)
+  }
 
-const gridBB2 = new BinaryMazeBlock("NE", 500, 500, 20)
-const gridB2 = new BinaryMaze("NE", 500, 500, 20)
+  initInstrs() {
+    let [x, y] = this.randomCord()
+    let visited = new Set()
+    visited.add(x + ',' + y)
 
-gridBB2.generateMaze()
-gridB2.generateMaze()
+    while (visited.size < this.totalSize) {
+      let [dx, dy] = this.randomDirection()
 
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+
+      if (visited.has(x + ',' + y)) {
+        this.instrs.push({x: null})
+        continue
+      }
+
+      visited.add(x + ',' + y)
+      this.instrs.push({x, y, dx: -dx, dy: -dy})
+    }
+  }
+}
+
+class ABMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    this.totalSize = ((height / scale - 1) / 2) * ((width / scale - 1) / 2)
+  }
+
+  initInstrs() {
+    let visited = new Set()
+    let [x, y] = this.randomCord()
+    visited.add(x + ',' + y)
+
+    while (visited.size < this.totalSize) {
+      this.instrs.push({x, y, dx: 0, dy: 0})
+      let [dx, dy] = this.randomDirection()
+      
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+
+      if (visited.has(x + ',' + y)) {
+        this.instrs.push({x: null})
+        continue
+      }
+      visited.add(x + ',' + y)
+      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+    }
+
+    this.instrs.push({x, y, dx: 0, dy: 0})
+  }
+
+}
+
+class RBMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs(x = this.x, y = this.y) {
+    const directions = this.randomDirections()
+
+    for (let i = 0; i < 4; i++) {
+      let [dx, dy] = directions[i]
+
+      if (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        !this.grid[y + dy][x + dx][0] ||
+        !this.grid[y + dy][x + dx][1] ||
+        !this.grid[y + dy + 1][x + dx][0] ||
+        !this.grid[y + dy][x + dx + 1][1]
+      )
+        continue
+
+      this.instrs.push({x, y, dx, dy})
+      this.removeEdge(x, y, dx, dy)
+      this.initInstrs(x + dx, y + dy)
+    }
+  }
+}
+
+class RBMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs(x = this.x, y = this.y) {
+    const directions = this.randomDirections()
+
+    for (let i = 0; i < 4; i++) {
+      let [dx, dy] = directions[i]
+      if (this.grid[y][x] === 0) this.instrs.push({x, y, dx: 0, dy: 0})
+      this.grid[y][x] = 1
+
+      if (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        this.grid[y + dy][x + dx + 1] ||
+        this.grid[y + dy + 1][x + dx] ||
+        this.grid[y + dy - 1][x + dx] ||
+        this.grid[y + dy][x + dx - 1]
+      ) continue
+      
+      this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
+      this.removeEdge(x, y, dx / 2, dy / 2)
+      this.initInstrs(x + dx, y + dy)
+    }
+  }
+}
+
+class HAKMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    const cords = this.randomCord()
+    this.x = cords[0]
+    this.y = cords[1]
+
+    this.visited = new Set()
+    this.visited.add(this.x + ',' + this.y)
+  }
+
+  initInstrs() {
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    visited.add(x + ',' + y)
+
+    while (true) {
+
+      if (
+        (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
+        (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
+        && (visited.has(x - 1 + ',' + y) || x === 0)
+        && (visited.has(x + ',' + (y - 1)) || y === 0)
+      ) {
+        [x, y] = this.scanForUnvisited(visited)
+        if (x === null) {
+          console.log(visited)
+          return
+        }
+      }
+
+
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        visited.has(x + dx + ',' + (y + dy))
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+
+      visited.add(x + ',' + y)
+      this.instrs.push({x, y, dx: -dx, dy: -dy})
+    }
+  }
+
+}
+
+class HAKMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+    const cords = this.randomCord()
+    this.x = cords[0]
+    this.y = cords[1]
+
+    this.visited = new Set()
+    this.visited.add(this.x + ',' + this.y)
+  }
+
+  initInstrs() {
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    visited.add(x + ',' + y)
+
+    while (true) {
+      this.instrs.push({x, y, dx: 0, dy: 0})
+
+      if (
+        (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+        (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
+        && (visited.has(x - 2 + ',' + y) || x === 1)
+        && (visited.has(x + ',' + (y - 2)) || y === 1)
+      ) {
+        [x, y] = this.scanForUnvisited(visited)
+        if (x === null) {
+          console.log(visited)
+          return
+        }
+      }
+
+
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        visited.has(x + dx + ',' + (y + dy))
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+      visited.add(x + ',' + y)
+      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+    }
+  }
+}
+
+
+//const gridBB = new BinaryMazeBlock("NE", 500, 500, 20)
+//const gridB = new BinaryMaze("NE", 500, 500, 20)
+
+//gridBB.generateMazeAnim()
+//gridB.generateMazeAnim()
+
+//const gridBB2 = new BinaryMazeBlock("NE", 500, 500, 20)
+//const gridB2 = new BinaryMaze("NE", 500, 500, 20)
+
+//gridBB2.generateMaze()
+//gridB2.generateMaze()
 
 //const gridABB = new ABMazeBlock(500, 500, 20)
 //const gridAB = new ABMaze(500, 500, 20)
@@ -676,17 +940,35 @@ gridB2.generateMaze()
 //gridABB.generateMazeAnim()
 //gridAB.generateMazeAnim()
 
+//const gridABB2 = new ABMazeBlock(500, 500, 20)
+//const gridAB2 = new ABMaze(500, 500, 20)
+
+//gridABB2.generateMaze()
+//gridAB2.generateMaze()
+
 //const gridRBB = new RBMazeBlock(500, 500, 20)
 //const gridRB = new RBMaze(500, 500, 20)
 
 //gridRBB.generateMazeAnim()
 //gridRB.generateMazeAnim()
 
-//const gridHAKB = new HAKMazeBlock(500, 500, 20)
-//const gridHAK = new HAKMaze(500, 500, 20)
+//const gridRBB2 = new RBMazeBlock(500, 500, 20)
+//const gridRB2 = new RBMaze(500, 500, 20)
 
-//gridHAK.generateMazeAnim()
-//gridHAKB .generateMazeAnim()
+//gridRBB2.generateMaze()
+//gridRB2.generateMaze()
+
+const gridHAKB = new HAKMazeBlock(500, 500, 20)
+const gridHAK = new HAKMaze(500, 500, 20)
+
+gridHAK.generateMazeAnim()
+gridHAKB .generateMazeAnim()
+
+const gridHAKB2 = new HAKMazeBlock(500, 500, 20)
+const gridHAK2 = new HAKMaze(500, 500, 20)
+
+gridHAK2.generateMaze()
+gridHAKB2 .generateMaze()
 
 //const gridSWB = new SWMazeBlock(500, 500, 20)
 //const gridSW = new SWMaze(500, 500, 20)
