@@ -590,10 +590,7 @@ class SWMaze extends Maze {
           run.length = 0
         }
       }
-      if (run.length > 0) {
-        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-        this.removeEdge(rx, ry, 0, -1)
-      }
+
       if (run.length > 0) {
         const [rx, ry] = run[Math.floor(Math.random() * run.length)]
         this.removeEdge(rx, ry, 0, -1)

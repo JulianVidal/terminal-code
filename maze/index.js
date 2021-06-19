@@ -408,13 +408,13 @@ class Maze {
     })
   }
 
-  removeEdge(x, y, dx, dy) {
+  removeEdge(x, y, dx, dy, add) {
     if (x === null) return
     const edgeSide = Math.abs(dx)
     dx = Math.max(0, dx)
     dy = Math.max(0, dy)
 
-    this.grid[y + dy][x + dx][edgeSide] = false
+    this.grid[y + dy][x + dx][edgeSide] = add === undefined ? false : true
   }
 
   randomDirection() {
@@ -486,7 +486,7 @@ class Maze {
 
   generateMaze() {
     this.reset()
-    this.instrs.forEach( ({x, y, dx, dy}) => this.removeEdge(x, y, dx, dy))
+    this.instrs.forEach( ({x, y, dx, dy, add}) => this.removeEdge(x, y, dx, dy, add))
     this.draw()
   }
 
@@ -494,8 +494,8 @@ class Maze {
     if (this.animating == false) this.resetAnim()
     if (this.instrs.length === this.step) return true
 
-    const {x, y, dx, dy}= this.instrs[this.step]
-    this.removeEdge(x, y, dx, dy)
+    const {x, y, dx, dy, add}= this.instrs[this.step]
+    this.removeEdge(x, y, dx, dy, add)
     this.step++
   }
 }
@@ -557,9 +557,9 @@ class MazeBlock extends Maze {
     })
   }
 
-  removeEdge(x, y, dx, dy) {
+  removeEdge(x, y, dx, dy, add) {
     if (x === null) return
-    this.grid[y + dy][x + dx] = 1
+    this.grid[y + dy][x + dx] = add === undefined ? 1 : 0
   }
 
   randomCord() {
@@ -615,7 +615,7 @@ class MazeBlock extends Maze {
             if (visited.has((x + dx) + ',' + (y + dy))) {
               visited.add(x + ',' + y)
               this.instrs.push({x, y, dx: 0, dy: 0})
-              this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+              this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
               if (
                   (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
                   (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
@@ -921,11 +921,128 @@ class HAKMazeBlock extends MazeBlock {
   }
 }
 
+class SWMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
 
-//const gridBB = new BinaryMazeBlock("NE", 500, 500, 20)
-//const gridB = new BinaryMaze("NE", 500, 500, 20)
+  initInstrs() {
+    const run = []
+    for (let y = 0; y < this.grid.length - 1; y++) {
+      for (let x = 0; x < this.grid[y].length - 1; x++) {
+        run.push([x, y])
+        if (Math.random() < 0.5) {
+          this.instrs.push({x, y, dx: 1, dy: 0})
+        } else {
+          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+          run.length = 0
+        }
+      }
 
-//gridBB.generateMazeAnim()
+      if (run.length > 0) {
+        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+      }
+      run.length = 0
+    }
+  }
+}
+
+class SWMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs() {
+    const run = []
+    for (let y = 1; y < this.height / this.scale; y += 2) {
+      for (let x = 1; x < this.width / this.scale; x += 2) {
+        this.instrs.push({x, y, dx: 0, dy: 0})
+        run.push([x, y])
+        if (Math.random() < 0.5) {
+          this.instrs.push({x, y, dx: 1, dy: 0})
+        } else {
+          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+          run.length = 0
+        }
+      }
+      if (run.length > 0) {
+        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
+        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+      }
+      run.length = 0
+    }
+  }
+}
+
+class RDMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+  initGrid() {
+    for (let y = 0; y <= this.height / this.scale; y++) {
+      if (!this.grid[y]) this.grid[y] = []
+      for (let x = 0; x <= this.width / this.scale; x++) {
+        let hor = x === this.width / this.scale || x === 0 ? true : false
+        let vert = y === this.height / this.scale || y === 0 ? true : false
+        this.grid[y].push([vert, hor])
+      }
+    }
+  }
+  
+  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
+    const wh = x2 - x1 + y2 - y1 
+    let prob = (y2 - y1) / wh
+    if (prob === 0.5) prob = Math.random()
+    if (0.5 < prob) {
+      const y3 = this.splitHor(x1, x2, y1, y2)
+
+      if (y3 === null || x2 - x1 <= 1) return
+
+      this.initInstrs(x1, x2, y1, y3)
+      this.initInstrs(x1, x2, y3, y2)
+    } else {
+      const x3 = this.splitVert(x1, x2, y1, y2)
+
+      if (x3 === null || y2 - y1 <= 1) return
+
+      this.initInstrs(x1, x3, y1, y2)
+      this.initInstrs(x3, x2, y1, y2)
+    }
+  }
+
+  splitHor(x1, x2, y1, y2) {
+    const y = Math.floor((y2 - y1) / 2) + y1
+    if (Math.floor((y2 - y1) / 2) < 1) return null
+
+    for (let x = x1; x < x2; x++) {
+      this.instrs.push({x, y, dx: 0, dy: -1, add: true})
+    } 
+
+    const x = Math.floor(Math.random() * (x2 - x1) + x1)
+    this.instrs.push({x, y, dx: 0, dy: -1})
+
+    return y
+  }
+
+  splitVert(x1, x2, y1, y2) {
+    const x = Math.floor((x2 - x1) / 2) + x1
+    if (Math.floor((x2 - x1) / 2) < 1) return null
+    
+    for (let y = y1; y < y2; y++) {
+      this.instrs.push({x, y, dx: -1, dy: 0, add: true})
+    } 
+    const y = Math.floor(Math.random() * (y2 - y1) + y1)
+    this.instrs.push({x, y, dx: -1, dy: 0})
+
+    return x
+  }
+
+}
+
+
 //gridB.generateMazeAnim()
 
 //const gridBB2 = new BinaryMazeBlock("NE", 500, 500, 20)
@@ -958,17 +1075,17 @@ class HAKMazeBlock extends MazeBlock {
 //gridRBB2.generateMaze()
 //gridRB2.generateMaze()
 
-const gridHAKB = new HAKMazeBlock(500, 500, 20)
-const gridHAK = new HAKMaze(500, 500, 20)
+//const gridHAKB = new HAKMazeBlock(500, 500, 20)
+//const gridHAK = new HAKMaze(500, 500, 20)
 
-gridHAK.generateMazeAnim()
-gridHAKB .generateMazeAnim()
+//gridHAK.generateMazeAnim()
+//gridHAKB .generateMazeAnim()
 
-const gridHAKB2 = new HAKMazeBlock(500, 500, 20)
-const gridHAK2 = new HAKMaze(500, 500, 20)
+//const gridHAKB2 = new HAKMazeBlock(500, 500, 20)
+//const gridHAK2 = new HAKMaze(500, 500, 20)
 
-gridHAK2.generateMaze()
-gridHAKB2 .generateMaze()
+//gridHAK2.generateMaze()
+//gridHAKB2 .generateMaze()
 
 //const gridSWB = new SWMazeBlock(500, 500, 20)
 //const gridSW = new SWMaze(500, 500, 20)
@@ -976,8 +1093,20 @@ gridHAKB2 .generateMaze()
 //gridSW.generateMazeAnim()
 //gridSWB.generateMazeAnim()
 
-//const gridRDB = new RDMazeBlock(500, 500, 20)
-//const gridRD = new RDMaze(500, 500, 20)
+//const gridSWB2 = new SWMazeBlock(500, 500, 20)
+//const gridSW2 = new SWMaze(500, 500, 20)
 
-//gridRD.generateMazeRecAnim()
-//gridRDB.generateMazeRecAnim()
+//gridSW2.generateMaze()
+gridSWB2.generateMaze()
+
+const gridRDB = new RDMazeBlock(500, 500, 20)
+////const gridRD = new RDMaze(500, 500, 20)
+
+//gridRD.generateMazeAnim()
+gridRDB.generateMazeRecAnim()
+
+const gridRDB2 = new RDMazeBlock(500, 500, 20)
+//const gridRD2 = new RDMaze(500, 500, 20)
+
+//gridRD2.generateMaze()
+gridRDB2.generateMazeAnim()
