@@ -350,6 +350,7 @@ class Maze {
     this.step = 0
     this.animating = false
     this.initGrid()
+    this.resetStep()
   }
 
   initGrid() {
@@ -376,6 +377,12 @@ class Maze {
     this.reset()
     this.step = 0
     this.animating = true
+    this.canvas.loop(() => this.draw(this))
+  }
+
+  resetStep() {
+    this.reset() 
+    this.step = 0
     this.canvas.loop(() => this.draw(this))
   }
 
@@ -494,6 +501,13 @@ class Maze {
     if (this.animating == false) this.resetAnim()
     if (this.instrs.length === this.step) return true
 
+    const {x, y, dx, dy, add}= this.instrs[this.step]
+    this.removeEdge(x, y, dx, dy, add)
+    this.step++
+  }
+
+  generateMazeStep() {
+    if (this.instrs.length === this.step) return true 
     const {x, y, dx, dy, add}= this.instrs[this.step]
     this.removeEdge(x, y, dx, dy, add)
     this.step++
@@ -981,6 +995,7 @@ class RDMaze extends Maze {
   constructor(height, width, scale) {
     super(height, width, scale)
   }
+
   initGrid() {
     for (let y = 0; y <= this.height / this.scale; y++) {
       if (!this.grid[y]) this.grid[y] = []
@@ -996,17 +1011,16 @@ class RDMaze extends Maze {
     const wh = x2 - x1 + y2 - y1 
     let prob = (y2 - y1) / wh
     if (prob === 0.5) prob = Math.random()
-    if (0.5 < prob) {
-      const y3 = this.splitHor(x1, x2, y1, y2)
 
-      if (y3 === null || x2 - x1 <= 1) return
+    if (0.5 < prob) {
+      if (y2 - y1 <= 1 || x2 - x1 <= 1) return
+      const y3 = this.splitHor(x1, x2, y1, y2)
 
       this.initInstrs(x1, x2, y1, y3)
       this.initInstrs(x1, x2, y3, y2)
     } else {
+      if (y2 - y1 <= 1 || x2 - x1 <= 1) return
       const x3 = this.splitVert(x1, x2, y1, y2)
-
-      if (x3 === null || y2 - y1 <= 1) return
 
       this.initInstrs(x1, x3, y1, y2)
       this.initInstrs(x3, x2, y1, y2)
@@ -1015,7 +1029,6 @@ class RDMaze extends Maze {
 
   splitHor(x1, x2, y1, y2) {
     const y = Math.floor((y2 - y1) / 2) + y1
-    if (Math.floor((y2 - y1) / 2) < 1) return null
 
     for (let x = x1; x < x2; x++) {
       this.instrs.push({x, y, dx: 0, dy: -1, add: true})
@@ -1029,7 +1042,6 @@ class RDMaze extends Maze {
 
   splitVert(x1, x2, y1, y2) {
     const x = Math.floor((x2 - x1) / 2) + x1
-    if (Math.floor((x2 - x1) / 2) < 1) return null
     
     for (let y = y1; y < y2; y++) {
       this.instrs.push({x, y, dx: -1, dy: 0, add: true})
@@ -1040,6 +1052,83 @@ class RDMaze extends Maze {
     return x
   }
 
+}
+
+class RDMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initGrid() {
+    for (let y = 0; y < this.height / this.scale; y++) {
+      if (!this.grid[y]) this.grid[y] = []
+      for (let x = 0; x < this.width / this.scale; x++) {
+        if (
+          x === 0 ||
+          y === 0 ||
+          x === this.width / this.scale - 1 ||
+          y === this.height / this.scale - 1
+        ) {
+          this.grid[y].push(0)
+        } else {
+          let color = 1
+          if (x % 2 === 1 && y % 2 === 1) color = 1
+          this.grid[y].push(color)
+        }
+      }
+    }
+  } 
+
+  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
+    const wh = (x2 - x1 + y2 - y1)
+    let prob = (y2 - y1) / wh
+    if (prob === 0.5) prob = Math.random()
+
+    if (0.5 < prob) {
+      if ((y2 - y1) / 2 <= 1 || (x2 - x1) / 2 <= 1) return
+      const y3 = this.splitHor(x1, x2, y1, y2)
+
+      this.initInstrs(x1, x2, y1, y3)
+      this.initInstrs(x1, x2, y3, y2)
+    } else {
+      if ((y2 - y1) / 2 <= 1 || (x2 - x1) / 2 <= 1) return
+      const x3 = this.splitVert(x1, x2, y1, y2)
+
+      this.initInstrs(x1, x3, y1, y2)
+      this.initInstrs(x3, x2, y1, y2)
+    }
+  }
+
+
+  splitHor(x1, x2, y1, y2) {
+    let y = Math.floor((y2 - y1) / 2) + y1
+    y += y % 2
+
+    for (let x = x1; x < x2; x++) {
+      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
+    } 
+
+    let x = Math.floor(Math.random() * (x2 - x1) + x1) 
+    x += 1 - (x % 2)
+    this.instrs.push({x, y, dx: 0, dy: 0})
+
+    return y
+  }
+
+  splitVert(x1, x2, y1, y2) {
+    let x = Math.floor((x2 - x1) / 2) + x1
+    x += x % 2
+    
+    for (let y = y1; y < y2; y++) {
+      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
+    } 
+
+    let y = Math.floor(Math.random() * (y2 - y1) + y1) 
+    y += 1 - (y % 2)
+    this.instrs.push({x, y, dx: 0, dy: 0})
+
+    return x
+  }
 }
 
 
@@ -1097,16 +1186,16 @@ class RDMaze extends Maze {
 //const gridSW2 = new SWMaze(500, 500, 20)
 
 //gridSW2.generateMaze()
-gridSWB2.generateMaze()
+//gridSWB2.generateMaze()
 
-const gridRDB = new RDMazeBlock(500, 500, 20)
-////const gridRD = new RDMaze(500, 500, 20)
+//const gridRDB = new RDMazeBlock(500, 500, 20)
+//const gridRD = new RDMaze(500, 500, 20)
 
 //gridRD.generateMazeAnim()
-gridRDB.generateMazeRecAnim()
+//gridRDB.generateMazeAnim()
 
-const gridRDB2 = new RDMazeBlock(500, 500, 20)
+//const gridRDB2 = new RDMazeBlock(500, 500, 20)
 //const gridRD2 = new RDMaze(500, 500, 20)
 
 //gridRD2.generateMaze()
-gridRDB2.generateMazeAnim()
+
