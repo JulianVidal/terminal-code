@@ -340,18 +340,28 @@ class Canvas {
 class QuadTree {
   constructor(points) {
     this.root = new Quad(0,0,500,500, points)
+    this.length = points.length
+  }
+
+  reCalculate(points) {
+    if (this.length === points.length) return
+    this.length = points.length
+    this.root = new Quad(0,0,500,500, points)
   }
 
   draw() {
     canvas.setStrokeColor('#FFF')
     this.root.drawQuads()
   }
+
+  findPoint(x, y) {
+    return this.root.findPoint(x, y)
+  }
 }
 
 class Quad {
   constructor(x, y, x3, y3, points) {
     this.dims = {x, y, x3, y3}
-    if (points === []) return
 
     if (points.length > 1) {
       const quadPoints = [[], [], [], []]
@@ -368,11 +378,9 @@ class Quad {
       this.quads.push(new Quad(x, y2, x2, y3, quadPoints[2]))
       // Bottom-Right
       this.quads.push(new Quad(x2, y2, x3, y3, quadPoints[3]))
-      return
-    } else  {
+    } else if (points.length === 1)  {
       this.point = points[0]
-      return
-    } 
+    }
   }
 
   drawQuads() {
@@ -417,20 +425,35 @@ class Quad {
       }
     }
   }
+
+  findPoint(x, y) {
+    if (this.quads === undefined) {
+      if (this.point === undefined) return -1
+      if (this.point.x === x && this.point.y === y) return this
+      return -1
+    }
+
+    const quadrant = this.findQuadrant(x, y)
+
+    return this.quads[quadrant].findPoint(x, y)
+  }
 }
 
-const canvas = new Canvas(500, 500)
-canvas.loop(draw)
+
 
 const ps = []
 const ranCords = () => { return {x: Math.floor(Math.random() * 480) + 10, y: Math.floor(Math.random() * 480) + 10}}
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
   ps.push(ranCords())
   console.log(ps[i])
 }
 
-const tree = new QuadTree(ps)
+const canvas = new Canvas(500, 500)
+canvas.canvasElement.addEventListener('click', ({offsetX, offsetY}) => ps.push({x: offsetX, y: offsetY}))
+canvas.loop(draw)
+
+let tree = new QuadTree(ps)
 
 function draw() {
   canvas.setColor('#000')
@@ -438,5 +461,6 @@ function draw() {
 
   canvas.setColor('#FFF')
   ps.forEach(({x, y}) => canvas.drawFilledCircle(x, y, 5))
+  tree.reCalculate(ps)
   tree.draw()
 }
