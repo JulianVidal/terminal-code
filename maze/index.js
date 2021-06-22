@@ -349,8 +349,6 @@ class Maze {
     this.instrs = []
     this.step = 0
     this.animating = false
-    this.initGrid()
-    this.resetStep()
   }
 
   initGrid() {
@@ -365,6 +363,8 @@ class Maze {
   }
 
   reset() {
+    this.grid = []
+    this.initGrid()
     this.instrs.length = 0
     this.initInstrs()
     this.grid = []
@@ -507,6 +507,7 @@ class Maze {
   }
 
   generateMazeStep() {
+    if (this.step = 0) this.resetStep()
     if (this.instrs.length === this.step) return true 
     const {x, y, dx, dy, add}= this.instrs[this.step]
     this.removeEdge(x, y, dx, dy, add)
@@ -648,485 +649,84 @@ class MazeBlock extends Maze {
   } 
 }
 
-class BinaryMaze extends Maze {
-  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
+class KMaze extends Maze {
+  constructor(height, width, scale) {
     super(height, width, scale)
-    this.dx = dir.includes('E') ? 1 : -1
-    this.dy = dir.includes('S') ? 1 : -1
+
   }
 
   initInstrs() {
-    const { dx, dy } = this
+    const ids = {}
+    const edges = []
+
     for (let y = 0; y < this.grid.length - 1; y++) {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
-        if (Math.random() < 0.5) this.instrs.push({x, y, dx, dy: 0})
-        else this.instrs.push({x, y, dx: 0, dy})
+        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 1, dy: 0})
+        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 1})
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
       }
     }
-  }
 
+    for (let t = edges.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = edges[t]
+      edges[t] = edges[j]
+      edges[j] = temp
+    }
+
+    while (edges.length > 0) {
+      const {x, y, dx, dy} = edges.shift()
+      const id = ids[x + ',' + y]
+      const id2 = ids[(x + dx) + ',' + (y + dy)]
+
+      if (id === id2) continue
+      this.instrs.push({x, y, dx, dy})
+      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
+    }
+
+  }
 }
 
-class BinaryMazeBlock extends MazeBlock {
-  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
+class KMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
     super(height, width, scale)
-    this.dx = dir.includes('E') ? 1 : -1
-    this.dy = dir.includes('S') ? 1 : -1
+
   }
 
   initInstrs() {
-    const { dx, dy } = this
+    const ids = {}
+    const edges = []
+
     for (let y = 1; y < this.grid.length; y += 2) {
       for (let x = 1; x < this.grid[y].length; x += 2) {
-        this.instrs.push({x, y, dx: 0, dy: 0})
-        if (Math.random() < 0.5) this.instrs.push({x, y, dx, dy: 0})
-        else this.instrs.push({x, y, dx: 0, dy})
+        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 2, dy: 0})
+        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 2})
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
       }
     }
-  }
-}
 
-class ABMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-
-    this.totalSize = (height / scale) * (width / scale)
-  }
-
-  initInstrs() {
-    let [x, y] = this.randomCord()
-    let visited = new Set()
-    visited.add(x + ',' + y)
-
-    while (visited.size < this.totalSize) {
-      let [dx, dy] = this.randomDirection()
-
-      while (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale
-      ) {
-        [dx, dy] = this.randomDirection()
-      }
-
-      x += dx
-      y += dy
-
-      if (visited.has(x + ',' + y)) {
-        this.instrs.push({x: null})
-        continue
-      }
-
-      visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx, dy: -dy})
+    for (let t = edges.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = edges[t]
+      edges[t] = edges[j]
+      edges[j] = temp
     }
-  }
-}
 
-class ABMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+    while (edges.length > 0) {
+      const {x, y, dx, dy} = edges.shift()
+      const id = ids[x + ',' + y]
+      const id2 = ids[(x + dx) + ',' + (y + dy)]
 
-    this.totalSize = ((height / scale - 1) / 2) * ((width / scale - 1) / 2)
-  }
-
-  initInstrs() {
-    let visited = new Set()
-    let [x, y] = this.randomCord()
-    visited.add(x + ',' + y)
-
-    while (visited.size < this.totalSize) {
       this.instrs.push({x, y, dx: 0, dy: 0})
-      let [dx, dy] = this.randomDirection()
-      
-      while (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale
-      ) {
-        [dx, dy] = this.randomDirection()
-      }
-
-      x += dx
-      y += dy
-
-      if (visited.has(x + ',' + y)) {
-        this.instrs.push({x: null})
-        continue
-      }
-      visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
-    }
-
-    this.instrs.push({x, y, dx: 0, dy: 0})
-  }
-
-}
-
-class RBMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initInstrs(x = this.x, y = this.y) {
-    const directions = this.randomDirections()
-
-    for (let i = 0; i < 4; i++) {
-      let [dx, dy] = directions[i]
-
-      if (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale ||
-        !this.grid[y + dy][x + dx][0] ||
-        !this.grid[y + dy][x + dx][1] ||
-        !this.grid[y + dy + 1][x + dx][0] ||
-        !this.grid[y + dy][x + dx + 1][1]
-      )
-        continue
-
-      this.instrs.push({x, y, dx, dy})
-      this.removeEdge(x, y, dx, dy)
-      this.initInstrs(x + dx, y + dy)
-    }
-  }
-}
-
-class RBMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initInstrs(x = this.x, y = this.y) {
-    const directions = this.randomDirections()
-
-    for (let i = 0; i < 4; i++) {
-      let [dx, dy] = directions[i]
-      if (this.grid[y][x] === 0) this.instrs.push({x, y, dx: 0, dy: 0})
-      this.grid[y][x] = 1
-
-      if (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale ||
-        this.grid[y + dy][x + dx + 1] ||
-        this.grid[y + dy + 1][x + dx] ||
-        this.grid[y + dy - 1][x + dx] ||
-        this.grid[y + dy][x + dx - 1]
-      ) continue
-      
+      if (id === id2) continue
       this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
-      this.removeEdge(x, y, dx / 2, dy / 2)
-      this.initInstrs(x + dx, y + dy)
+      this.instrs.push({x, y, dx, dy})
+      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
     }
+
   }
 }
 
-class HAKMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
 
-    const cords = this.randomCord()
-    this.x = cords[0]
-    this.y = cords[1]
-
-    this.visited = new Set()
-    this.visited.add(this.x + ',' + this.y)
-  }
-
-  initInstrs() {
-    let [x, y] = this.randomCord()
-    const visited = new Set()
-    visited.add(x + ',' + y)
-
-    while (true) {
-
-      if (
-        (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
-        (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
-        && (visited.has(x - 1 + ',' + y) || x === 0)
-        && (visited.has(x + ',' + (y - 1)) || y === 0)
-      ) {
-        [x, y] = this.scanForUnvisited(visited)
-        if (x === null) {
-          console.log(visited)
-          return
-        }
-      }
-
-
-      let [dx, dy] = this.randomDirection()
-
-      while (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale ||
-        visited.has(x + dx + ',' + (y + dy))
-      ) {
-        [dx, dy] = this.randomDirection()
-      }
-
-      x += dx
-      y += dy
-
-      visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx, dy: -dy})
-    }
-  }
-
-}
-
-class HAKMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-
-    const cords = this.randomCord()
-    this.x = cords[0]
-    this.y = cords[1]
-
-    this.visited = new Set()
-    this.visited.add(this.x + ',' + this.y)
-  }
-
-  initInstrs() {
-    let [x, y] = this.randomCord()
-    const visited = new Set()
-    visited.add(x + ',' + y)
-
-    while (true) {
-      this.instrs.push({x, y, dx: 0, dy: 0})
-
-      if (
-        (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
-        (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
-        && (visited.has(x - 2 + ',' + y) || x === 1)
-        && (visited.has(x + ',' + (y - 2)) || y === 1)
-      ) {
-        [x, y] = this.scanForUnvisited(visited)
-        if (x === null) {
-          console.log(visited)
-          return
-        }
-      }
-
-
-      let [dx, dy] = this.randomDirection()
-
-      while (
-        y + dy < 0 ||
-        x + dx < 0 ||
-        y + dy >= this.height / this.scale ||
-        x + dx >= this.width / this.scale ||
-        visited.has(x + dx + ',' + (y + dy))
-      ) {
-        [dx, dy] = this.randomDirection()
-      }
-
-      x += dx
-      y += dy
-      visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
-    }
-  }
-}
-
-class SWMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initInstrs() {
-    const run = []
-    for (let y = 0; y < this.grid.length - 1; y++) {
-      for (let x = 0; x < this.grid[y].length - 1; x++) {
-        run.push([x, y])
-        if (Math.random() < 0.5) {
-          this.instrs.push({x, y, dx: 1, dy: 0})
-        } else {
-          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
-          run.length = 0
-        }
-      }
-
-      if (run.length > 0) {
-        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
-      }
-      run.length = 0
-    }
-  }
-}
-
-class SWMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initInstrs() {
-    const run = []
-    for (let y = 1; y < this.height / this.scale; y += 2) {
-      for (let x = 1; x < this.width / this.scale; x += 2) {
-        this.instrs.push({x, y, dx: 0, dy: 0})
-        run.push([x, y])
-        if (Math.random() < 0.5) {
-          this.instrs.push({x, y, dx: 1, dy: 0})
-        } else {
-          const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
-          run.length = 0
-        }
-      }
-      if (run.length > 0) {
-        const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
-      }
-      run.length = 0
-    }
-  }
-}
-
-class RDMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initGrid() {
-    for (let y = 0; y <= this.height / this.scale; y++) {
-      if (!this.grid[y]) this.grid[y] = []
-      for (let x = 0; x <= this.width / this.scale; x++) {
-        let hor = x === this.width / this.scale || x === 0 ? true : false
-        let vert = y === this.height / this.scale || y === 0 ? true : false
-        this.grid[y].push([vert, hor])
-      }
-    }
-  }
-  
-  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
-    const wh = x2 - x1 + y2 - y1 
-    let prob = (y2 - y1) / wh
-    if (prob === 0.5) prob = Math.random()
-
-    if (0.5 < prob) {
-      if (y2 - y1 <= 1 || x2 - x1 <= 1) return
-      const y3 = this.splitHor(x1, x2, y1, y2)
-
-      this.initInstrs(x1, x2, y1, y3)
-      this.initInstrs(x1, x2, y3, y2)
-    } else {
-      if (y2 - y1 <= 1 || x2 - x1 <= 1) return
-      const x3 = this.splitVert(x1, x2, y1, y2)
-
-      this.initInstrs(x1, x3, y1, y2)
-      this.initInstrs(x3, x2, y1, y2)
-    }
-  }
-
-  splitHor(x1, x2, y1, y2) {
-    const y = Math.floor((y2 - y1) / 2) + y1
-
-    for (let x = x1; x < x2; x++) {
-      this.instrs.push({x, y, dx: 0, dy: -1, add: true})
-    } 
-
-    const x = Math.floor(Math.random() * (x2 - x1) + x1)
-    this.instrs.push({x, y, dx: 0, dy: -1})
-
-    return y
-  }
-
-  splitVert(x1, x2, y1, y2) {
-    const x = Math.floor((x2 - x1) / 2) + x1
-    
-    for (let y = y1; y < y2; y++) {
-      this.instrs.push({x, y, dx: -1, dy: 0, add: true})
-    } 
-    const y = Math.floor(Math.random() * (y2 - y1) + y1)
-    this.instrs.push({x, y, dx: -1, dy: 0})
-
-    return x
-  }
-
-}
-
-class RDMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initGrid() {
-    for (let y = 0; y < this.height / this.scale; y++) {
-      if (!this.grid[y]) this.grid[y] = []
-      for (let x = 0; x < this.width / this.scale; x++) {
-        if (
-          x === 0 ||
-          y === 0 ||
-          x === this.width / this.scale - 1 ||
-          y === this.height / this.scale - 1
-        ) {
-          this.grid[y].push(0)
-        } else {
-          let color = 1
-          if (x % 2 === 1 && y % 2 === 1) color = 1
-          this.grid[y].push(color)
-        }
-      }
-    }
-  } 
-
-  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
-    const wh = (x2 - x1 + y2 - y1)
-    let prob = (y2 - y1) / wh
-    if (prob === 0.5) prob = Math.random()
-
-    if (0.5 < prob) {
-      if ((y2 - y1) / 2 <= 1 || (x2 - x1) / 2 <= 1) return
-      const y3 = this.splitHor(x1, x2, y1, y2)
-
-      this.initInstrs(x1, x2, y1, y3)
-      this.initInstrs(x1, x2, y3, y2)
-    } else {
-      if ((y2 - y1) / 2 <= 1 || (x2 - x1) / 2 <= 1) return
-      const x3 = this.splitVert(x1, x2, y1, y2)
-
-      this.initInstrs(x1, x3, y1, y2)
-      this.initInstrs(x3, x2, y1, y2)
-    }
-  }
-
-
-  splitHor(x1, x2, y1, y2) {
-    let y = Math.floor((y2 - y1) / 2) + y1
-    y += y % 2
-
-    for (let x = x1; x < x2; x++) {
-      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
-    } 
-
-    let x = Math.floor(Math.random() * (x2 - x1) + x1) 
-    x += 1 - (x % 2)
-    this.instrs.push({x, y, dx: 0, dy: 0})
-
-    return y
-  }
-
-  splitVert(x1, x2, y1, y2) {
-    let x = Math.floor((x2 - x1) / 2) + x1
-    x += x % 2
-    
-    for (let y = y1; y < y2; y++) {
-      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
-    } 
-
-    let y = Math.floor(Math.random() * (y2 - y1) + y1) 
-    y += 1 - (y % 2)
-    this.instrs.push({x, y, dx: 0, dy: 0})
-
-    return x
-  }
-}
+const grid = new KMazeBlock(500, 500, 20)
+grid.generateMazeAnim()
