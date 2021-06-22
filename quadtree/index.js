@@ -339,8 +339,12 @@ class Canvas {
 
 class QuadTree {
   constructor(points) {
-    this.root = new Quad(0,0,500,500, points)
+    this.root = new Quad(0,0,500,500, points, this)
     this.length = points.length
+    this.x = 0
+    this.y = 0
+    this.w = 0
+    this.h = 0
   }
 
   reCalculate(points) {
@@ -352,16 +356,26 @@ class QuadTree {
   draw() {
     canvas.setStrokeColor('#FFF')
     this.root.drawQuads()
+    canvas.drawOutlinedRectangle(this.x, this.y, this.w, this.h)
   }
 
   findPoint(x, y) {
     return this.root.findPoint(x, y)
   }
+
+  getPoints(x, y, w, h) {
+    this.x = x
+    this.y = y
+    this.w = w
+    this.h = h
+    return this.root.getPoints(x, y, w, h)
+  }
 }
 
 class Quad {
-  constructor(x, y, x3, y3, points) {
+  constructor(x, y, x3, y3, points, parent) {
     this.dims = {x, y, x3, y3}
+    this.parent = parent
 
     if (points.length > 1) {
       const quadPoints = [[], [], [], []]
@@ -371,13 +385,13 @@ class Quad {
       const y2 = (y3 - y) / 2 + y
       this.quads = []
       // Top-Left
-      this.quads.push(new Quad(x, y, x2, y2, quadPoints[0]))
+      this.quads.push(new Quad(x, y, x2, y2, quadPoints[0], this))
       // Top-Right
-      this.quads.push(new Quad(x2, y, x3, y2, quadPoints[1]))
+      this.quads.push(new Quad(x2, y, x3, y2, quadPoints[1], this))
       // Bottom-Left
-      this.quads.push(new Quad(x, y2, x2, y3, quadPoints[2]))
+      this.quads.push(new Quad(x, y2, x2, y3, quadPoints[2], this))
       // Bottom-Right
-      this.quads.push(new Quad(x2, y2, x3, y3, quadPoints[3]))
+      this.quads.push(new Quad(x2, y2, x3, y3, quadPoints[3], this))
     } else if (points.length === 1)  {
       this.point = points[0]
     }
@@ -424,8 +438,44 @@ class Quad {
         return 3
       }
     }
+
+    return -1
   }
 
+  findQuadrants(rx, ry,) {
+    const {x, y, x3, y3} = this.dims
+    const x2 = (x3 - x) / 2 + x 
+    const y2 = (y3 - y) / 2 + y
+
+    const quadrants = []
+
+    // Left Quadrants
+    if (rx <= x2) {
+      // Top
+      if (ry <= y2) {
+        quadrants.push(0)
+      }
+      // Bottom
+      if (ry > y2) {
+        quadrants.push(2)
+      }
+    }
+
+    // Right Quadrants 
+    if (rx > x2) {
+      // Top
+      if (ry <= y2) {
+        quadrants.push(1)
+      }
+      // Bottom
+      if (ry > y2) {
+        quadrants.push(3)
+      }
+    }
+
+    return quadrants
+  }
+  
   findPoint(x, y) {
     if (this.quads === undefined) {
       if (this.point === undefined) return -1
@@ -437,6 +487,41 @@ class Quad {
 
     return this.quads[quadrant].findPoint(x, y)
   }
+
+ 
+
+  getPoints(x, y, w, h) {
+
+    if (this.quads === undefined) {
+      if (this.point === undefined) return -1
+      return this.point
+    }
+
+    let quadrants = this.findQuadrants(x, y)
+    quadrants = quadrants
+      .concat(this.findQuadrants(x + w, y))
+      .concat(this.findQuadrants(x, y + h))
+      .concat(this.findQuadrants(x + w, y + h))
+    
+    let quadSet = new Set(quadrants)
+
+    quadrants = Array.from(quadSet)
+
+    let points = []
+
+    for (let i = 0; i < quadrants.length; i++) {
+      const quadrant = quadrants[i]  
+      const point = this.quads[quadrant].getPoints(x, y, w, h)
+
+      if (point === -1) continue
+
+      if (Array.isArray(point)) points = points.concat(point)
+      else points.push(point)
+    }
+
+    return points
+  }
+
 }
 
 
@@ -444,14 +529,12 @@ class Quad {
 const ps = []
 const ranCords = () => { return {x: Math.floor(Math.random() * 480) + 10, y: Math.floor(Math.random() * 480) + 10}}
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 100; i++) {
   ps.push(ranCords())
-  console.log(ps[i])
 }
 
 const canvas = new Canvas(500, 500)
 canvas.canvasElement.addEventListener('click', ({offsetX, offsetY}) => ps.push({x: offsetX, y: offsetY}))
-canvas.loop(draw)
 
 let tree = new QuadTree(ps)
 
@@ -464,3 +547,4 @@ function draw() {
   tree.reCalculate(ps)
   tree.draw()
 }
+canvas.loop(draw)
