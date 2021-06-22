@@ -739,7 +739,7 @@ class GTMaze extends Maze {
   visited.add(x + ',' + y)
 
   while (path.length > 0) {
-
+      [x, y] = path[Math.floor(path.length * Math.random())]
     if (
       (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
       (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
@@ -748,8 +748,6 @@ class GTMaze extends Maze {
     ) {
       const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
       path.splice(index, 1)
-      if (path.length === 0) continue
-      [x, y] = path[Math.floor(path.length / 2)]
       continue
     }
 
@@ -776,4 +774,4 @@ class GTMaze extends Maze {
 
 
 const grid = new GTMaze(500, 500, 20)
-grid.generateMazeAnim()
+grid.generateMaze()
