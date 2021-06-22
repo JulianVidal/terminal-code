@@ -507,7 +507,7 @@ class Maze {
   }
 
   generateMazeStep() {
-    if (this.step = 0) this.resetStep()
+    if (this.step === 0) this.resetStep()
     if (this.instrs.length === this.step) return true 
     const {x, y, dx, dy, add}= this.instrs[this.step]
     this.removeEdge(x, y, dx, dy, add)
@@ -727,6 +727,53 @@ class KMazeBlock extends MazeBlock {
   }
 }
 
+class GTMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
 
-const grid = new KMazeBlock(500, 500, 20)
+  initInstrs() {
+  let [x, y] = this.randomCord()
+  const visited = new Set()
+  const path = [[x, y]]
+  visited.add(x + ',' + y)
+
+  while (path.length > 0) {
+
+    if (
+      (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
+      (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
+      && (visited.has(x - 1 + ',' + y) || x === 0)
+      && (visited.has(x + ',' + (y - 1)) || y === 0)
+    ) {
+      const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
+      path.splice(index, 1)
+      if (path.length === 0) continue
+      [x, y] = path[Math.floor(path.length / 2)]
+      continue
+    }
+
+    let [dx, dy] = this.randomDirection()
+
+    while (
+      y + dy < 0 ||
+      x + dx < 0 ||
+      y + dy >= this.height / this.scale ||
+      x + dx >= this.width / this.scale ||
+      visited.has(x + dx + ',' + (y + dy))
+    ) {
+      [dx, dy] = this.randomDirection()
+    }
+
+    x += dx
+    y += dy
+    visited.add(x + ',' + y)
+    this.instrs.push({x, y, dx: -dx, dy: -dy})
+    path.push([x, y])
+  }
+  }
+}
+
+
+const grid = new GTMaze(500, 500, 20)
 grid.generateMazeAnim()
