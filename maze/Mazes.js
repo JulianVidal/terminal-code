@@ -1130,3 +1130,173 @@ class RDMazeBlock extends MazeBlock {
     return x
   }
 }
+
+class KMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+  }
+
+  initInstrs() {
+    const ids = {}
+    const edges = []
+
+    for (let y = 0; y < this.grid.length - 1; y++) {
+      for (let x = 0; x < this.grid[y].length - 1; x++) {
+        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 1, dy: 0})
+        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 1})
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
+      }
+    }
+
+    for (let t = edges.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = edges[t]
+      edges[t] = edges[j]
+      edges[j] = temp
+    }
+
+    while (edges.length > 0) {
+      const {x, y, dx, dy} = edges.shift()
+      const id = ids[x + ',' + y]
+      const id2 = ids[(x + dx) + ',' + (y + dy)]
+
+      if (id === id2) continue
+      this.instrs.push({x, y, dx, dy})
+      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
+    }
+
+  }
+}
+
+class KMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+
+  }
+
+  initInstrs() {
+    const ids = {}
+    const edges = []
+
+    for (let y = 1; y < this.grid.length; y += 2) {
+      for (let x = 1; x < this.grid[y].length; x += 2) {
+        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 2, dy: 0})
+        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 2})
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
+      }
+    }
+
+    for (let t = edges.length - 1; t > 0; t--) {
+      const j = Math.floor(Math.random() * (t + 1))
+      let temp = edges[t]
+      edges[t] = edges[j]
+      edges[j] = temp
+    }
+
+    while (edges.length > 0) {
+      const {x, y, dx, dy} = edges.shift()
+      const id = ids[x + ',' + y]
+      const id2 = ids[(x + dx) + ',' + (y + dy)]
+
+      this.instrs.push({x, y, dx: 0, dy: 0})
+      if (id === id2) continue
+      this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
+      this.instrs.push({x, y, dx, dy})
+      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
+    }
+
+  }
+}
+
+class GTMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs() {
+  let [x, y] = this.randomCord()
+  const visited = new Set()
+  const path = [[x, y]]
+  visited.add(x + ',' + y)
+
+  while (path.length > 0) {
+      [x, y] = path[Math.floor(path.length * Math.random())]
+    if (
+      (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
+      (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
+      && (visited.has(x - 1 + ',' + y) || x === 0)
+      && (visited.has(x + ',' + (y - 1)) || y === 0)
+    ) {
+      const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
+      path.splice(index, 1)
+      continue
+    }
+
+    let [dx, dy] = this.randomDirection()
+
+    while (
+      y + dy < 0 ||
+      x + dx < 0 ||
+      y + dy >= this.height / this.scale ||
+      x + dx >= this.width / this.scale ||
+      visited.has(x + dx + ',' + (y + dy))
+    ) {
+      [dx, dy] = this.randomDirection()
+    }
+
+    x += dx
+    y += dy
+    visited.add(x + ',' + y)
+    this.instrs.push({x, y, dx: -dx, dy: -dy})
+    path.push([x, y])
+  }
+  }
+}
+
+class GTMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs() {
+  let [x, y] = this.randomCord()
+  const visited = new Set()
+  const path = [[x, y]]
+  visited.add(x + ',' + y)
+
+  while (path.length > 0) {
+      [x, y] = path[Math.floor(path.length * Math.random())]
+      this.instrs.push({x, y, dx: 0, dy: 0})
+    if (
+      (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+      (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
+      && (visited.has(x - 2 + ',' + y) || x === 1)
+      && (visited.has(x + ',' + (y - 2)) || y === 1)
+    ) {
+      const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
+      path.splice(index, 1)
+      continue
+    }
+
+    let [dx, dy] = this.randomDirection()
+
+    while (
+      y + dy < 0 ||
+      x + dx < 0 ||
+      y + dy >= this.height / this.scale ||
+      x + dx >= this.width / this.scale ||
+      visited.has(x + dx + ',' + (y + dy))
+    ) {
+      [dx, dy] = this.randomDirection()
+    }
+
+    x += dx
+    y += dy
+    visited.add(x + ',' + y)
+    this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+    path.push([x, y])
+  }
+  }
+}
+
