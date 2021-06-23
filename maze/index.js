@@ -458,8 +458,8 @@ class Maze {
   }
 
   randomCord() {
-    const x = Math.floor(Math.random() * (this.width / this.scale - 1))
-    const y = Math.floor(Math.random() * (this.height / this.scale - 1))
+    const x = Math.floor(Math.random() * (this.width / this.scale))
+    const y = Math.floor(Math.random() * (this.height / this.scale))
     return [x, y]
   }
 
@@ -649,92 +649,62 @@ class MazeBlock extends Maze {
   } 
 }
 
-class PMaze extends Maze {
+class WMaze extends Maze {
   constructor(height, width, scale) {
     super(height, width, scale)
+    this.totalSize = (height / scale) * (width / scale)
   }
 
   initInstrs() {
     let [x, y] = this.randomCord()
     const visited = new Set()
     visited.add(x + ',' + y)
-    let marked = new Set()
-    marked = this.addMarked(visited, x, y, marked)
 
-    while (marked.size > 0) {
-      [x, y] = Array.from(marked)[Math.floor(marked.size * Math.random())].split(',').map(num => parseInt(num))
-      const directions = this.randomDirections()
+    const path = []
+    for (let y = 0; y <= this.height / this.scale; y++) {
+      if (!path[y]) path[y] = []
+      for (let x = 0; x <= this.width / this.scale; x++) {
+        path[y].push([0, 0])
+      }
+    }
 
-      for (const [dx, dy] of directions) {
-        if (visited.has((x + dx) + ',' + (y + dy))) {
-          marked.delete(x + ',' + y)
-          marked = this.addMarked(visited, x, y, marked)
-          visited.add(x + ',' + y)
-          this.instrs.push({x, y, dx, dy})
-          break
+    while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+    let start = [x, y]
+
+    while (visited.size < this.totalSize) {
+      if (visited.has(x + ',' + y)) {
+        while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+        start = [x, y]
+      }
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      path[y][x] = [dx, dy]
+      x += dx
+      y += dy
+
+      if (visited.has(x + ',' + y)) {
+        let [tx, ty] = start
+        while (!visited.has(tx + ',' + ty)) {
+          visited.add(tx + ',' + ty)
+          const [tdx, tdy] = path[ty][tx]
+          this.instrs.push({x: tx, y: ty, dx: tdx, dy: tdy})
+          tx += tdx
+          ty += tdy
         }
       }
     }
-  }
 
-  addMarked(visited, x, y, marked) {
-    if (!visited.has(x + 1 + ',' + y)
-      && x !== this.width / this.scale - 1) marked.add((x + 1) + ',' + y)
-
-    if (!visited.has(x + ',' + (y + 1)) 
-      && y !== this.height / this.scale - 1) marked.add(x + ',' + (y + 1))
-
-    if (!visited.has(x - 1 + ',' + y) && x !== 0)marked.add((x - 1) + ',' + y)
-
-    if (!visited.has(x + ',' + (y - 1)) && y !== 0)marked.add(x + ',' + (y - 1))
-
-    return marked
   }
 }
 
-class PMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
-  }
-
-  initInstrs() {
-    let [x, y] = this.randomCord()
-    const visited = new Set()
-    visited.add(x + ',' + y)
-    let marked = new Set()
-    marked = this.addMarked(visited, x, y, marked)
-    this.instrs.push({x, y, dx: 0, dy: 0})
-
-    while (marked.size > 0) {
-      [x, y] = Array.from(marked)[Math.floor(marked.size * Math.random())].split(',').map(num => parseInt(num))
-      const directions = this.randomDirections()
-
-      for (const [dx, dy] of directions) {
-        if (visited.has((x + dx) + ',' + (y + dy))) {
-          marked.delete(x + ',' + y)
-          marked = this.addMarked(visited, x, y, marked)
-          visited.add(x + ',' + y)
-          this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
-          this.instrs.push({x, y, dx: 0, dy: 0})
-          break
-        }
-      }
-    }
-  }
-
-  addMarked(visited, x, y, marked) {
-    if (!visited.has(x + 2 + ',' + y)
-      && x !== this.width / this.scale - 2) marked.add((x + 2) + ',' + y)
-
-    if (!visited.has(x + ',' + (y + 2)) 
-      && y !== this.height / this.scale - 2) marked.add(x + ',' + (y + 2))
-
-    if (!visited.has(x - 2 + ',' + y) && x !== 1)marked.add((x - 2) + ',' + y)
-
-    if (!visited.has(x + ',' + (y - 2)) && y !== 1)marked.add(x + ',' + (y - 2))
-
-    return marked
-  }
-}
-const grid = new PMaze(500, 500, 20)
-grid.generateMazeAnim()
+const grid = new WMaze(500, 500, 20)
+grid.generateMaze()
