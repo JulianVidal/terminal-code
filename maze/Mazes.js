@@ -1388,3 +1388,122 @@ class PMazeBlock extends MazeBlock {
   }
 }
 
+class WMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+    this.totalSize = (height / scale) * (width / scale)
+  }
+
+  initInstrs() {
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    visited.add(x + ',' + y)
+
+    const path = []
+    for (let y = 0; y <= this.height / this.scale; y++) {
+      if (!path[y]) path[y] = []
+      for (let x = 0; x <= this.width / this.scale; x++) {
+        path[y].push([0, 0])
+      }
+    }
+
+    while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+    let start = [x, y]
+
+    while (visited.size < this.totalSize) {
+      if (visited.has(x + ',' + y)) {
+        while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+        start = [x, y]
+      }
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      path[y][x] = [dx, dy]
+      this.instrs.push({x:null})
+      x += dx
+      y += dy
+
+      if (visited.has(x + ',' + y)) {
+        let [tx, ty] = start
+        while (!visited.has(tx + ',' + ty)) {
+          visited.add(tx + ',' + ty)
+          const [tdx, tdy] = path[ty][tx]
+          this.instrs.push({x: tx, y: ty, dx: tdx, dy: tdy})
+          tx += tdx
+          ty += tdy
+        }
+      }
+    }
+
+  }
+}
+
+class WMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+    this.totalSize = ((height / scale - 1) / 2) * ((width / scale - 1) / 2)
+  }
+
+  initInstrs() {
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    visited.add(x + ',' + y)
+
+    const path = []
+    for (let y = 0; y <= this.height / this.scale; y++) {
+      if (!path[y]) path[y] = []
+      for (let x = 0; x <= this.width / this.scale; x++) {
+        path[y].push([0, 0])
+      }
+    }
+
+    while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+    let start = [x, y]
+
+    while (visited.size < this.totalSize) {
+      if (visited.has(x + ',' + y)) {
+        while (visited.has(x + ',' + y)) [x, y] = this.randomCord()
+        start = [x, y]
+      }
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale
+      ) {
+        [dx, dy] = this.randomDirection()
+      }
+
+      path[y][x] = [dx, dy]
+      this.instrs.push({x:null})
+      x += dx
+      y += dy
+
+      if (visited.has(x + ',' + y)) {
+        let [tx, ty] = start
+        while (!visited.has(tx + ',' + ty)) {
+          visited.add(tx + ',' + ty)
+          this.instrs.push({x: tx, y: ty, dx: 0, dy: 0})
+          const [tdx, tdy] = path[ty][tx]
+          this.instrs.push({x: tx, y: ty, dx: tdx / 2, dy: tdy / 2})
+          tx += tdx
+          ty += tdy
+        }
+        this.instrs.push({x: tx, y: ty, dx: 0, dy: 0})
+      }
+    }
+
+  }
+}
+
+
