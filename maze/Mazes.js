@@ -381,7 +381,7 @@ class Maze {
   }
 
   resetStep() {
-    this.reset() 
+    this.reset()
     this.step = 0
     this.canvas.loop(() => this.draw(this))
   }
@@ -434,9 +434,9 @@ class Maze {
     } else {
       if (Math.random() < 0.5) dy = 1
       else dy = -1
-  }
+    }
 
-  return [dx, dy]
+    return [dx, dy]
   }
 
   randomDirections() {
@@ -463,37 +463,11 @@ class Maze {
     return [x, y]
   }
 
-  scanForUnvisited(visited) {
-    const directions = this.randomDirections()
-
-    for (let y = 0; y < this.height / this.scale; y++) {
-      for (let x = 0; x < this.width / this.scale; x++) {
-        if (!visited.has(x + ',' + y)) {
-          for (let i = 0; i < directions.length; i++) {
-            const [dx, dy] = directions[i]
-            if (visited.has((x + dx) + ',' + (y + dy))) {
-              visited.add(x + ',' + y)
-              this.instrs.push({x, y, dx, dy})
-              if (
-                (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
-                (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
-                && (visited.has(x - 1 + ',' + y) || x === 0)
-                && (visited.has(x + ',' + (y - 1)) || y === 0)
-              ) {
-                return this.scanForUnvisited(visited)
-              }
-              return [x, y]
-            }
-          }
-        }
-      }
-    }
-    return [null, null]
-  }
-
   generateMaze() {
     this.reset()
-    this.instrs.forEach( ({x, y, dx, dy, add}) => this.removeEdge(x, y, dx, dy, add))
+    this.instrs.forEach(({ x, y, dx, dy, add }) =>
+      this.removeEdge(x, y, dx, dy, add)
+    )
     this.draw()
   }
 
@@ -501,14 +475,14 @@ class Maze {
     if (this.animating == false) this.resetAnim()
     if (this.instrs.length === this.step) return true
 
-    const {x, y, dx, dy, add}= this.instrs[this.step]
+    const { x, y, dx, dy, add } = this.instrs[this.step]
     this.removeEdge(x, y, dx, dy, add)
     this.step++
   }
 
   generateMazeStep() {
-    if (this.instrs.length === this.step) return true 
-    const {x, y, dx, dy, add}= this.instrs[this.step]
+    if (this.instrs.length === this.step) return true
+    const { x, y, dx, dy, add } = this.instrs[this.step]
     this.removeEdge(x, y, dx, dy, add)
     this.step++
   }
@@ -617,35 +591,6 @@ class MazeBlock extends Maze {
 
     return directions
   }
-
-  scanForUnvisited(visited) {
-  const directions = this.randomDirections()
-
-    for (let y = 1; y < this.height / this.scale; y += 2) {
-      for (let x = 1; x < this.width / this.scale; x += 2) {
-        if (!visited.has(x + ',' + y)) {
-          for (let i = 0; i < directions.length; i++) {
-            const [dx, dy] = directions[i]
-            if (visited.has((x + dx) + ',' + (y + dy))) {
-              visited.add(x + ',' + y)
-              this.instrs.push({x, y, dx: 0, dy: 0})
-              this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
-              if (
-                  (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
-                  (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
-                  && (visited.has(x - 2 + ',' + y) || x === 1)
-                && (visited.has(x + ',' + (y - 2)) || y === 1)
-              ) {
-                return this.scanForUnvisited(visited)
-              }
-              return [x, y]
-            }
-          }
-        }
-      }
-    }
-    return [null, null]
-  } 
 }
 
 class BinaryMaze extends Maze {
@@ -659,12 +604,11 @@ class BinaryMaze extends Maze {
     const { dx, dy } = this
     for (let y = 0; y < this.grid.length - 1; y++) {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
-        if (Math.random() < 0.5) this.instrs.push({x, y, dx, dy: 0})
-        else this.instrs.push({x, y, dx: 0, dy})
+        if (Math.random() < 0.5) this.instrs.push({ x, y, dx, dy: 0 })
+        else this.instrs.push({ x, y, dx: 0, dy })
       }
     }
   }
-
 }
 
 class BinaryMazeBlock extends MazeBlock {
@@ -678,9 +622,9 @@ class BinaryMazeBlock extends MazeBlock {
     const { dx, dy } = this
     for (let y = 1; y < this.grid.length; y += 2) {
       for (let x = 1; x < this.grid[y].length; x += 2) {
-        this.instrs.push({x, y, dx: 0, dy: 0})
-        if (Math.random() < 0.5) this.instrs.push({x, y, dx, dy: 0})
-        else this.instrs.push({x, y, dx: 0, dy})
+        this.instrs.push({ x, y, dx: 0, dy: 0 })
+        if (Math.random() < 0.5) this.instrs.push({ x, y, dx, dy: 0 })
+        else this.instrs.push({ x, y, dx: 0, dy })
       }
     }
   }
@@ -707,19 +651,19 @@ class ABMaze extends Maze {
         y + dy >= this.height / this.scale ||
         x + dx >= this.width / this.scale
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
 
       if (visited.has(x + ',' + y)) {
-        this.instrs.push({x: null})
+        this.instrs.push({ x: null })
         continue
       }
 
       visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx, dy: -dy})
+      this.instrs.push({ x, y, dx: -dx, dy: -dy })
     }
   }
 }
@@ -737,32 +681,31 @@ class ABMazeBlock extends MazeBlock {
     visited.add(x + ',' + y)
 
     while (visited.size < this.totalSize) {
-      this.instrs.push({x, y, dx: 0, dy: 0})
+      this.instrs.push({ x, y, dx: 0, dy: 0 })
       let [dx, dy] = this.randomDirection()
-      
+
       while (
         y + dy < 0 ||
         x + dx < 0 ||
         y + dy >= this.height / this.scale ||
         x + dx >= this.width / this.scale
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
 
       if (visited.has(x + ',' + y)) {
-        this.instrs.push({x: null})
+        this.instrs.push({ x: null })
         continue
       }
       visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+      this.instrs.push({ x, y, dx: -dx / 2, dy: -dy / 2 })
     }
 
-    this.instrs.push({x, y, dx: 0, dy: 0})
+    this.instrs.push({ x, y, dx: 0, dy: 0 })
   }
-
 }
 
 class RBMaze extends Maze {
@@ -788,7 +731,7 @@ class RBMaze extends Maze {
       )
         continue
 
-      this.instrs.push({x, y, dx, dy})
+      this.instrs.push({ x, y, dx, dy })
       this.removeEdge(x, y, dx, dy)
       this.initInstrs(x + dx, y + dy)
     }
@@ -805,7 +748,7 @@ class RBMazeBlock extends MazeBlock {
 
     for (let i = 0; i < 4; i++) {
       let [dx, dy] = directions[i]
-      if (this.grid[y][x] === 0) this.instrs.push({x, y, dx: 0, dy: 0})
+      if (this.grid[y][x] === 0) this.instrs.push({ x, y, dx: 0, dy: 0 })
       this.grid[y][x] = 1
 
       if (
@@ -817,9 +760,10 @@ class RBMazeBlock extends MazeBlock {
         this.grid[y + dy + 1][x + dx] ||
         this.grid[y + dy - 1][x + dx] ||
         this.grid[y + dy][x + dx - 1]
-      ) continue
-      
-      this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
+      )
+        continue
+
+      this.instrs.push({ x, y, dx: dx / 2, dy: dy / 2 })
       this.removeEdge(x, y, dx / 2, dy / 2)
       this.initInstrs(x + dx, y + dy)
     }
@@ -844,20 +788,19 @@ class HAKMaze extends Maze {
     visited.add(x + ',' + y)
 
     while (true) {
-
       if (
         (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
-        (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
-        && (visited.has(x - 1 + ',' + y) || x === 0)
-        && (visited.has(x + ',' + (y - 1)) || y === 0)
+        (visited.has(x + ',' + (y + 1)) ||
+          y === this.height / this.scale - 1) &&
+        (visited.has(x - 1 + ',' + y) || x === 0) &&
+        (visited.has(x + ',' + (y - 1)) || y === 0)
       ) {
-        [x, y] = this.scanForUnvisited(visited)
+        ;[x, y] = this.scanForUnvisited(visited)
         if (x === null) {
           console.log(visited)
           return
         }
       }
-
 
       let [dx, dy] = this.randomDirection()
 
@@ -868,17 +811,46 @@ class HAKMaze extends Maze {
         x + dx >= this.width / this.scale ||
         visited.has(x + dx + ',' + (y + dy))
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
 
       visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx, dy: -dy})
+      this.instrs.push({ x, y, dx: -dx, dy: -dy })
     }
   }
 
+  scanForUnvisited(visited) {
+    const directions = this.randomDirections()
+
+    for (let y = 0; y < this.height / this.scale; y++) {
+      for (let x = 0; x < this.width / this.scale; x++) {
+        if (!visited.has(x + ',' + y)) {
+          for (let i = 0; i < directions.length; i++) {
+            const [dx, dy] = directions[i]
+            if (visited.has(x + dx + ',' + (y + dy))) {
+              visited.add(x + ',' + y)
+              this.instrs.push({ x, y, dx, dy })
+              if (
+                (visited.has(x + 1 + ',' + y) ||
+                  x === this.width / this.scale - 1) &&
+                (visited.has(x + ',' + (y + 1)) ||
+                  y === this.height / this.scale - 1) &&
+                (visited.has(x - 1 + ',' + y) || x === 0) &&
+                (visited.has(x + ',' + (y - 1)) || y === 0)
+              ) {
+                return this.scanForUnvisited(visited)
+              }
+              return [x, y]
+            }
+          }
+        }
+      }
+    }
+    return [null, null]
+  }
 }
 
 class HAKMazeBlock extends MazeBlock {
@@ -899,21 +871,21 @@ class HAKMazeBlock extends MazeBlock {
     visited.add(x + ',' + y)
 
     while (true) {
-      this.instrs.push({x, y, dx: 0, dy: 0})
+      this.instrs.push({ x, y, dx: 0, dy: 0 })
 
       if (
         (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
-        (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
-        && (visited.has(x - 2 + ',' + y) || x === 1)
-        && (visited.has(x + ',' + (y - 2)) || y === 1)
+        (visited.has(x + ',' + (y + 2)) ||
+          y === this.height / this.scale - 2) &&
+        (visited.has(x - 2 + ',' + y) || x === 1) &&
+        (visited.has(x + ',' + (y - 2)) || y === 1)
       ) {
-        [x, y] = this.scanForUnvisited(visited)
+        ;[x, y] = this.scanForUnvisited(visited)
         if (x === null) {
           console.log(visited)
           return
         }
       }
-
 
       let [dx, dy] = this.randomDirection()
 
@@ -924,14 +896,45 @@ class HAKMazeBlock extends MazeBlock {
         x + dx >= this.width / this.scale ||
         visited.has(x + dx + ',' + (y + dy))
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
       visited.add(x + ',' + y)
-      this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
+      this.instrs.push({ x, y, dx: -dx / 2, dy: -dy / 2 })
     }
+  }
+
+  scanForUnvisited(visited) {
+    const directions = this.randomDirections()
+
+    for (let y = 1; y < this.height / this.scale; y += 2) {
+      for (let x = 1; x < this.width / this.scale; x += 2) {
+        if (!visited.has(x + ',' + y)) {
+          for (let i = 0; i < directions.length; i++) {
+            const [dx, dy] = directions[i]
+            if (visited.has(x + dx + ',' + (y + dy))) {
+              visited.add(x + ',' + y)
+              this.instrs.push({ x, y, dx: 0, dy: 0 })
+              this.instrs.push({ x, y, dx: dx / 2, dy: dy / 2 })
+              if (
+                (visited.has(x + 2 + ',' + y) ||
+                  x === this.width / this.scale - 2) &&
+                (visited.has(x + ',' + (y + 2)) ||
+                  y === this.height / this.scale - 2) &&
+                (visited.has(x - 2 + ',' + y) || x === 1) &&
+                (visited.has(x + ',' + (y - 2)) || y === 1)
+              ) {
+                return this.scanForUnvisited(visited)
+              }
+              return [x, y]
+            }
+          }
+        }
+      }
+    }
+    return [null, null]
   }
 }
 
@@ -946,17 +949,17 @@ class SWMaze extends Maze {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
         run.push([x, y])
         if (Math.random() < 0.5) {
-          this.instrs.push({x, y, dx: 1, dy: 0})
+          this.instrs.push({ x, y, dx: 1, dy: 0 })
         } else {
           const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+          this.instrs.push({ x: rx, y: ry, dx: 0, dy: -1 })
           run.length = 0
         }
       }
 
       if (run.length > 0) {
         const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+        this.instrs.push({ x: rx, y: ry, dx: 0, dy: -1 })
       }
       run.length = 0
     }
@@ -972,19 +975,19 @@ class SWMazeBlock extends MazeBlock {
     const run = []
     for (let y = 1; y < this.height / this.scale; y += 2) {
       for (let x = 1; x < this.width / this.scale; x += 2) {
-        this.instrs.push({x, y, dx: 0, dy: 0})
+        this.instrs.push({ x, y, dx: 0, dy: 0 })
         run.push([x, y])
         if (Math.random() < 0.5) {
-          this.instrs.push({x, y, dx: 1, dy: 0})
+          this.instrs.push({ x, y, dx: 1, dy: 0 })
         } else {
           const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-          this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+          this.instrs.push({ x: rx, y: ry, dx: 0, dy: -1 })
           run.length = 0
         }
       }
       if (run.length > 0) {
         const [rx, ry] = run[Math.floor(Math.random() * run.length)]
-        this.instrs.push({x: rx, y: ry, dx: 0, dy: -1})
+        this.instrs.push({ x: rx, y: ry, dx: 0, dy: -1 })
       }
       run.length = 0
     }
@@ -1006,9 +1009,14 @@ class RDMaze extends Maze {
       }
     }
   }
-  
-  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
-    const wh = x2 - x1 + y2 - y1 
+
+  initInstrs(
+    x1 = 0,
+    x2 = this.grid[0].length - 1,
+    y1 = 0,
+    y2 = this.grid.length - 1
+  ) {
+    const wh = x2 - x1 + y2 - y1
     let prob = (y2 - y1) / wh
     if (prob === 0.5) prob = Math.random()
 
@@ -1031,27 +1039,26 @@ class RDMaze extends Maze {
     const y = Math.floor((y2 - y1) / 2) + y1
 
     for (let x = x1; x < x2; x++) {
-      this.instrs.push({x, y, dx: 0, dy: -1, add: true})
-    } 
+      this.instrs.push({ x, y, dx: 0, dy: -1, add: true })
+    }
 
     const x = Math.floor(Math.random() * (x2 - x1) + x1)
-    this.instrs.push({x, y, dx: 0, dy: -1})
+    this.instrs.push({ x, y, dx: 0, dy: -1 })
 
     return y
   }
 
   splitVert(x1, x2, y1, y2) {
     const x = Math.floor((x2 - x1) / 2) + x1
-    
+
     for (let y = y1; y < y2; y++) {
-      this.instrs.push({x, y, dx: -1, dy: 0, add: true})
-    } 
+      this.instrs.push({ x, y, dx: -1, dy: 0, add: true })
+    }
     const y = Math.floor(Math.random() * (y2 - y1) + y1)
-    this.instrs.push({x, y, dx: -1, dy: 0})
+    this.instrs.push({ x, y, dx: -1, dy: 0 })
 
     return x
   }
-
 }
 
 class RDMazeBlock extends MazeBlock {
@@ -1077,10 +1084,15 @@ class RDMazeBlock extends MazeBlock {
         }
       }
     }
-  } 
+  }
 
-  initInstrs(x1 = 0, x2 = this.grid[0].length - 1, y1 = 0, y2 = this.grid.length - 1) {
-    const wh = (x2 - x1 + y2 - y1)
+  initInstrs(
+    x1 = 0,
+    x2 = this.grid[0].length - 1,
+    y1 = 0,
+    y2 = this.grid.length - 1
+  ) {
+    const wh = x2 - x1 + y2 - y1
     let prob = (y2 - y1) / wh
     if (prob === 0.5) prob = Math.random()
 
@@ -1099,18 +1111,17 @@ class RDMazeBlock extends MazeBlock {
     }
   }
 
-
   splitHor(x1, x2, y1, y2) {
     let y = Math.floor((y2 - y1) / 2) + y1
     y += y % 2
 
     for (let x = x1; x < x2; x++) {
-      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
-    } 
+      this.instrs.push({ x, y, dx: 0, dy: 0, add: true })
+    }
 
-    let x = Math.floor(Math.random() * (x2 - x1) + x1) 
+    let x = Math.floor(Math.random() * (x2 - x1) + x1)
     x += 1 - (x % 2)
-    this.instrs.push({x, y, dx: 0, dy: 0})
+    this.instrs.push({ x, y, dx: 0, dy: 0 })
 
     return y
   }
@@ -1118,14 +1129,14 @@ class RDMazeBlock extends MazeBlock {
   splitVert(x1, x2, y1, y2) {
     let x = Math.floor((x2 - x1) / 2) + x1
     x += x % 2
-    
-    for (let y = y1; y < y2; y++) {
-      this.instrs.push({x, y, dx: 0, dy: 0, add: true})
-    } 
 
-    let y = Math.floor(Math.random() * (y2 - y1) + y1) 
+    for (let y = y1; y < y2; y++) {
+      this.instrs.push({ x, y, dx: 0, dy: 0, add: true })
+    }
+
+    let y = Math.floor(Math.random() * (y2 - y1) + y1)
     y += 1 - (y % 2)
-    this.instrs.push({x, y, dx: 0, dy: 0})
+    this.instrs.push({ x, y, dx: 0, dy: 0 })
 
     return x
   }
@@ -1134,7 +1145,6 @@ class RDMazeBlock extends MazeBlock {
 class KMaze extends Maze {
   constructor(height, width, scale) {
     super(height, width, scale)
-
   }
 
   initInstrs() {
@@ -1143,9 +1153,9 @@ class KMaze extends Maze {
 
     for (let y = 0; y < this.grid.length - 1; y++) {
       for (let x = 0; x < this.grid[y].length - 1; x++) {
-        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 1, dy: 0})
-        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 1})
-        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
+        if (x !== this.grid[y].length - 2) edges.push({ x, y, dx: 1, dy: 0 })
+        if (y !== this.grid.length - 2) edges.push({ x, y, dx: 0, dy: 1 })
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x
       }
     }
 
@@ -1157,22 +1167,22 @@ class KMaze extends Maze {
     }
 
     while (edges.length > 0) {
-      const {x, y, dx, dy} = edges.shift()
+      const { x, y, dx, dy } = edges.shift()
       const id = ids[x + ',' + y]
-      const id2 = ids[(x + dx) + ',' + (y + dy)]
+      const id2 = ids[x + dx + ',' + (y + dy)]
 
       if (id === id2) continue
-      this.instrs.push({x, y, dx, dy})
-      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
+      this.instrs.push({ x, y, dx, dy })
+      Object.keys(ids).forEach((key) => {
+        if (ids[key] === id2) ids[key] = id
+      })
     }
-
   }
 }
 
 class KMazeBlock extends MazeBlock {
   constructor(height, width, scale) {
     super(height, width, scale)
-
   }
 
   initInstrs() {
@@ -1181,9 +1191,9 @@ class KMazeBlock extends MazeBlock {
 
     for (let y = 1; y < this.grid.length; y += 2) {
       for (let x = 1; x < this.grid[y].length; x += 2) {
-        if (x !== this.grid[y].length - 2) edges.push({x, y, dx: 2, dy: 0})
-        if (y !== this.grid.length - 2) edges.push({x, y, dx: 0, dy: 2})
-        ids[x + ',' + y] = y * (this.grid.length - 1) + x 
+        if (x !== this.grid[y].length - 2) edges.push({ x, y, dx: 2, dy: 0 })
+        if (y !== this.grid.length - 2) edges.push({ x, y, dx: 0, dy: 2 })
+        ids[x + ',' + y] = y * (this.grid.length - 1) + x
       }
     }
 
@@ -1195,17 +1205,18 @@ class KMazeBlock extends MazeBlock {
     }
 
     while (edges.length > 0) {
-      const {x, y, dx, dy} = edges.shift()
+      const { x, y, dx, dy } = edges.shift()
       const id = ids[x + ',' + y]
-      const id2 = ids[(x + dx) + ',' + (y + dy)]
+      const id2 = ids[x + dx + ',' + (y + dy)]
 
-      this.instrs.push({x, y, dx: 0, dy: 0})
+      this.instrs.push({ x, y, dx: 0, dy: 0 })
       if (id === id2) continue
-      this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
-      this.instrs.push({x, y, dx, dy})
-      Object.keys(ids).forEach(key => {if (ids[key] === id2) ids[key] = id})
+      this.instrs.push({ x, y, dx: dx / 2, dy: dy / 2 })
+      this.instrs.push({ x, y, dx, dy })
+      Object.keys(ids).forEach((key) => {
+        if (ids[key] === id2) ids[key] = id
+      })
     }
-
   }
 }
 
@@ -1215,42 +1226,43 @@ class GTMaze extends Maze {
   }
 
   initInstrs() {
-  let [x, y] = this.randomCord()
-  const visited = new Set()
-  const path = [[x, y]]
-  visited.add(x + ',' + y)
-
-  while (path.length > 0) {
-      [x, y] = path[Math.floor(path.length * Math.random())]
-    if (
-      (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
-      (visited.has(x + ',' + (y + 1)) || y === this.height / this.scale - 1)
-      && (visited.has(x - 1 + ',' + y) || x === 0)
-      && (visited.has(x + ',' + (y - 1)) || y === 0)
-    ) {
-      const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
-      path.splice(index, 1)
-      continue
-    }
-
-    let [dx, dy] = this.randomDirection()
-
-    while (
-      y + dy < 0 ||
-      x + dx < 0 ||
-      y + dy >= this.height / this.scale ||
-      x + dx >= this.width / this.scale ||
-      visited.has(x + dx + ',' + (y + dy))
-    ) {
-      [dx, dy] = this.randomDirection()
-    }
-
-    x += dx
-    y += dy
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    const path = [[x, y]]
     visited.add(x + ',' + y)
-    this.instrs.push({x, y, dx: -dx, dy: -dy})
-    path.push([x, y])
-  }
+
+    while (path.length > 0) {
+      ;[x, y] = path[Math.floor(path.length * Math.random())]
+      if (
+        (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
+        (visited.has(x + ',' + (y + 1)) ||
+          y === this.height / this.scale - 1) &&
+        (visited.has(x - 1 + ',' + y) || x === 0) &&
+        (visited.has(x + ',' + (y - 1)) || y === 0)
+      ) {
+        const index = path.findIndex((cord) => cord[0] === x && cord[1] === y)
+        path.splice(index, 1)
+        continue
+      }
+
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        visited.has(x + dx + ',' + (y + dy))
+      ) {
+        ;[dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+      visited.add(x + ',' + y)
+      this.instrs.push({ x, y, dx: -dx, dy: -dy })
+      path.push([x, y])
+    }
   }
 }
 
@@ -1260,43 +1272,44 @@ class GTMazeBlock extends MazeBlock {
   }
 
   initInstrs() {
-  let [x, y] = this.randomCord()
-  const visited = new Set()
-  const path = [[x, y]]
-  visited.add(x + ',' + y)
-
-  while (path.length > 0) {
-      [x, y] = path[Math.floor(path.length * Math.random())]
-      this.instrs.push({x, y, dx: 0, dy: 0})
-    if (
-      (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
-      (visited.has(x + ',' + (y + 2)) || y === this.height / this.scale - 2)
-      && (visited.has(x - 2 + ',' + y) || x === 1)
-      && (visited.has(x + ',' + (y - 2)) || y === 1)
-    ) {
-      const index = path.findIndex(cord => cord[0] === x && cord[1] === y)
-      path.splice(index, 1)
-      continue
-    }
-
-    let [dx, dy] = this.randomDirection()
-
-    while (
-      y + dy < 0 ||
-      x + dx < 0 ||
-      y + dy >= this.height / this.scale ||
-      x + dx >= this.width / this.scale ||
-      visited.has(x + dx + ',' + (y + dy))
-    ) {
-      [dx, dy] = this.randomDirection()
-    }
-
-    x += dx
-    y += dy
+    let [x, y] = this.randomCord()
+    const visited = new Set()
+    const path = [[x, y]]
     visited.add(x + ',' + y)
-    this.instrs.push({x, y, dx: -dx / 2, dy: -dy / 2})
-    path.push([x, y])
-  }
+
+    while (path.length > 0) {
+      ;[x, y] = path[Math.floor(path.length * Math.random())]
+      this.instrs.push({ x, y, dx: 0, dy: 0 })
+      if (
+        (visited.has(x + 2 + ',' + y) || x === this.width / this.scale - 2) &&
+        (visited.has(x + ',' + (y + 2)) ||
+          y === this.height / this.scale - 2) &&
+        (visited.has(x - 2 + ',' + y) || x === 1) &&
+        (visited.has(x + ',' + (y - 2)) || y === 1)
+      ) {
+        const index = path.findIndex((cord) => cord[0] === x && cord[1] === y)
+        path.splice(index, 1)
+        continue
+      }
+
+      let [dx, dy] = this.randomDirection()
+
+      while (
+        y + dy < 0 ||
+        x + dx < 0 ||
+        y + dy >= this.height / this.scale ||
+        x + dx >= this.width / this.scale ||
+        visited.has(x + dx + ',' + (y + dy))
+      ) {
+        ;[dx, dy] = this.randomDirection()
+      }
+
+      x += dx
+      y += dy
+      visited.add(x + ',' + y)
+      this.instrs.push({ x, y, dx: -dx / 2, dy: -dy / 2 })
+      path.push([x, y])
+    }
   }
 }
 
@@ -1313,15 +1326,17 @@ class PMaze extends Maze {
     marked = this.addMarked(visited, x, y, marked)
 
     while (marked.size > 0) {
-      [x, y] = Array.from(marked)[Math.floor(marked.size * Math.random())].split(',').map(num => parseInt(num))
+      ;[x, y] = Array.from(marked)
+        [Math.floor(marked.size * Math.random())].split(',')
+        .map((num) => parseInt(num))
       const directions = this.randomDirections()
 
       for (const [dx, dy] of directions) {
-        if (visited.has((x + dx) + ',' + (y + dy))) {
+        if (visited.has(x + dx + ',' + (y + dy))) {
           marked.delete(x + ',' + y)
           marked = this.addMarked(visited, x, y, marked)
           visited.add(x + ',' + y)
-          this.instrs.push({x, y, dx, dy})
+          this.instrs.push({ x, y, dx, dy })
           break
         }
       }
@@ -1329,15 +1344,16 @@ class PMaze extends Maze {
   }
 
   addMarked(visited, x, y, marked) {
-    if (!visited.has(x + 1 + ',' + y)
-      && x !== this.width / this.scale - 1) marked.add((x + 1) + ',' + y)
+    if (!visited.has(x + 1 + ',' + y) && x !== this.width / this.scale - 1)
+      marked.add(x + 1 + ',' + y)
 
-    if (!visited.has(x + ',' + (y + 1)) 
-      && y !== this.height / this.scale - 1) marked.add(x + ',' + (y + 1))
+    if (!visited.has(x + ',' + (y + 1)) && y !== this.height / this.scale - 1)
+      marked.add(x + ',' + (y + 1))
 
-    if (!visited.has(x - 1 + ',' + y) && x !== 0)marked.add((x - 1) + ',' + y)
+    if (!visited.has(x - 1 + ',' + y) && x !== 0) marked.add(x - 1 + ',' + y)
 
-    if (!visited.has(x + ',' + (y - 1)) && y !== 0)marked.add(x + ',' + (y - 1))
+    if (!visited.has(x + ',' + (y - 1)) && y !== 0)
+      marked.add(x + ',' + (y - 1))
 
     return marked
   }
@@ -1354,19 +1370,21 @@ class PMazeBlock extends MazeBlock {
     visited.add(x + ',' + y)
     let marked = new Set()
     marked = this.addMarked(visited, x, y, marked)
-    this.instrs.push({x, y, dx: 0, dy: 0})
+    this.instrs.push({ x, y, dx: 0, dy: 0 })
 
     while (marked.size > 0) {
-      [x, y] = Array.from(marked)[Math.floor(marked.size * Math.random())].split(',').map(num => parseInt(num))
+      ;[x, y] = Array.from(marked)
+        [Math.floor(marked.size * Math.random())].split(',')
+        .map((num) => parseInt(num))
       const directions = this.randomDirections()
 
       for (const [dx, dy] of directions) {
-        if (visited.has((x + dx) + ',' + (y + dy))) {
+        if (visited.has(x + dx + ',' + (y + dy))) {
           marked.delete(x + ',' + y)
           marked = this.addMarked(visited, x, y, marked)
           visited.add(x + ',' + y)
-          this.instrs.push({x, y, dx: dx / 2, dy: dy / 2})
-          this.instrs.push({x, y, dx: 0, dy: 0})
+          this.instrs.push({ x, y, dx: dx / 2, dy: dy / 2 })
+          this.instrs.push({ x, y, dx: 0, dy: 0 })
           break
         }
       }
@@ -1374,15 +1392,16 @@ class PMazeBlock extends MazeBlock {
   }
 
   addMarked(visited, x, y, marked) {
-    if (!visited.has(x + 2 + ',' + y)
-      && x !== this.width / this.scale - 2) marked.add((x + 2) + ',' + y)
+    if (!visited.has(x + 2 + ',' + y) && x !== this.width / this.scale - 2)
+      marked.add(x + 2 + ',' + y)
 
-    if (!visited.has(x + ',' + (y + 2)) 
-      && y !== this.height / this.scale - 2) marked.add(x + ',' + (y + 2))
+    if (!visited.has(x + ',' + (y + 2)) && y !== this.height / this.scale - 2)
+      marked.add(x + ',' + (y + 2))
 
-    if (!visited.has(x - 2 + ',' + y) && x !== 1)marked.add((x - 2) + ',' + y)
+    if (!visited.has(x - 2 + ',' + y) && x !== 1) marked.add(x - 2 + ',' + y)
 
-    if (!visited.has(x + ',' + (y - 2)) && y !== 1)marked.add(x + ',' + (y - 2))
+    if (!visited.has(x + ',' + (y - 2)) && y !== 1)
+      marked.add(x + ',' + (y - 2))
 
     return marked
   }
@@ -1423,11 +1442,11 @@ class WMaze extends Maze {
         y + dy >= this.height / this.scale ||
         x + dx >= this.width / this.scale
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       path[y][x] = [dx, dy]
-      this.instrs.push({x:null})
+      this.instrs.push({ x: null })
       x += dx
       y += dy
 
@@ -1436,13 +1455,12 @@ class WMaze extends Maze {
         while (!visited.has(tx + ',' + ty)) {
           visited.add(tx + ',' + ty)
           const [tdx, tdy] = path[ty][tx]
-          this.instrs.push({x: tx, y: ty, dx: tdx, dy: tdy})
+          this.instrs.push({ x: tx, y: ty, dx: tdx, dy: tdy })
           tx += tdx
           ty += tdy
         }
       }
     }
-
   }
 }
 
@@ -1481,11 +1499,11 @@ class WMazeBlock extends MazeBlock {
         y + dy >= this.height / this.scale ||
         x + dx >= this.width / this.scale
       ) {
-        [dx, dy] = this.randomDirection()
+        ;[dx, dy] = this.randomDirection()
       }
 
       path[y][x] = [dx, dy]
-      this.instrs.push({x:null})
+      this.instrs.push({ x: null })
       x += dx
       y += dy
 
@@ -1493,17 +1511,14 @@ class WMazeBlock extends MazeBlock {
         let [tx, ty] = start
         while (!visited.has(tx + ',' + ty)) {
           visited.add(tx + ',' + ty)
-          this.instrs.push({x: tx, y: ty, dx: 0, dy: 0})
+          this.instrs.push({ x: tx, y: ty, dx: 0, dy: 0 })
           const [tdx, tdy] = path[ty][tx]
-          this.instrs.push({x: tx, y: ty, dx: tdx / 2, dy: tdy / 2})
+          this.instrs.push({ x: tx, y: ty, dx: tdx / 2, dy: tdy / 2 })
           tx += tdx
           ty += tdy
         }
-        this.instrs.push({x: tx, y: ty, dx: 0, dy: 0})
+        this.instrs.push({ x: tx, y: ty, dx: 0, dy: 0 })
       }
     }
-
   }
 }
-
-
