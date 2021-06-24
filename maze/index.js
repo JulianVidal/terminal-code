@@ -743,7 +743,7 @@ class RBMazeBlock extends MazeBlock {
     super(height, width, scale)
   }
 
-  initInstrs(x = this.x, y = this.y) {
+  initInstrs(x = 1, y = 1) {
     const directions = this.randomDirections()
 
     for (let i = 0; i < 4; i++) {
@@ -797,7 +797,6 @@ class HAKMaze extends Maze {
       ) {
         ;[x, y] = this.scanForUnvisited(visited)
         if (x === null) {
-          console.log(visited)
           return
         }
       }
@@ -1708,16 +1707,16 @@ class EMazeBlock extends MazeBlock {
 
 const grid = []
 
-grid.push(new BinaryMaze('NE', 500, 500, 20))
-grid.push(new ABMaze(500, 500, 20))
-grid.push(new RBMaze(500, 500, 20))
-grid.push(new HAKMaze(500, 500, 20))
-grid.push(new SWMaze(500, 500, 20))
-grid.push(new RDMaze(500, 500, 20))
-grid.push(new KMaze(500, 500, 20))
-grid.push(new GTMaze(500, 500, 20))
-grid.push(new PMaze(500, 500, 20))
-grid.push(new WMaze(500, 500, 20))
-grid.push(new EMaze(500, 500, 20))
+grid.push(new BinaryMazeBlock('NE', 500, 500, 20))
+grid.push(new ABMazeBlock(500, 500, 20))
+grid.push(new RBMazeBlock(500, 500, 20))
+grid.push(new HAKMazeBlock(500, 500, 20))
+grid.push(new SWMazeBlock(500, 500, 20))
+grid.push(new RDMazeBlock(500, 500, 20))
+grid.push(new KMazeBlock(500, 500, 20))
+grid.push(new GTMazeBlock(500, 500, 20))
+grid.push(new PMazeBlock(500, 500, 20))
+grid.push(new WMazeBlock(500, 500, 20))
+grid.push(new EMazeBlock(500, 500, 20))
 
 grid.forEach(maze => maze.generateMazeAnim())
