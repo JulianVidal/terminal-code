@@ -1706,6 +1706,18 @@ class EMazeBlock extends MazeBlock {
   }
 }
 
+const grid = []
 
-const grid = new RDMazeBlock(500, 500, 20)
-grid.generateMazeAnim()
+grid.push(new BinaryMaze('NE', 500, 500, 20))
+grid.push(new ABMaze(500, 500, 20))
+grid.push(new RBMaze(500, 500, 20))
+grid.push(new HAKMaze(500, 500, 20))
+grid.push(new SWMaze(500, 500, 20))
+grid.push(new RDMaze(500, 500, 20))
+grid.push(new KMaze(500, 500, 20))
+grid.push(new GTMaze(500, 500, 20))
+grid.push(new PMaze(500, 500, 20))
+grid.push(new WMaze(500, 500, 20))
+grid.push(new EMaze(500, 500, 20))
+
+grid.forEach(maze => maze.generateMazeAnim())
