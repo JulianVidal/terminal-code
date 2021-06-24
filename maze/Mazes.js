@@ -1522,3 +1522,186 @@ class WMazeBlock extends MazeBlock {
     }
   }
 }
+
+class EMaze extends Maze {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs() {
+    let nextRow = []
+    const rl = this.grid[0].length
+
+    for (let y = 0; y < this.grid.length - 1; y++) {
+      const row = [...nextRow]
+      nextRow.length = 0
+      for (let i = 0; i < this.grid[0].length - 1; i++) {
+        let dup = false
+        for (let j = 0; j < row.length; j++) {
+          const set = row[j]
+          if (set.has(i + rl * y)) dup = true
+        }
+        if (!dup) row.push(new Set([i + rl * y]))
+      }
+
+      for (let t = row.length - 1; t > 0; t--) {
+        const j = Math.floor(Math.random() * (t + 1))
+        let temp = row[t]
+        row[t] = row[j]
+        row[j] = temp
+      }
+
+      if (y === this.grid.length - 2) {
+        for (let s = 0; s < row.length; s++) {
+          for (let s2 = 0; s2 < row.length; s2++) {
+            const [set, set2] = [row[s], row[s2]]
+            const [x, x2] = this.checkAdj(set, set2)
+            if (x !== null) {
+              this.instrs.push({ x: x - rl * y, y, dx: x2 - x, dy: 0 })
+              row[s] = new Set([...row[s], ...row[s2]])
+              row.splice(s2, 1)
+              s = 0
+              s2 = 0
+            }
+          }
+        }
+        continue
+      }
+      for (let s = 0; s < row.length; s++) {
+        for (let s2 = 0; s2 < row.length; s2++) {
+          const [set, set2] = [row[s], row[s2]]
+          const [x, x2] = this.checkAdj(set, set2)
+          if (x !== null && Math.random() < 0.5) {
+            this.instrs.push({ x: x - rl * y, y, dx: x2 - x, dy: 0 })
+            row[s] = new Set([...row[s], ...row[s2]])
+            row.splice(s2, 1)
+            if (s2 < s) s--
+          }
+        }
+      }
+
+      for (let s = 0; s < row.length; s++) {
+        const set = row[s]
+        let i = 0
+        const ri = Math.floor(Math.random() * set.size)
+
+        const nextSet = new Set()
+        for (const x of set) {
+          if (Math.random() < 0.5 || i === ri) {
+            this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 1 })
+            nextSet.add(x + rl)
+          }
+          i++
+        }
+        nextRow.push(nextSet)
+      }
+    }
+  }
+
+  checkAdj(set, set2) {
+    if (set === set2) return [null, null]
+    for (const x of set) {
+      for (const x2 of set2) {
+        if (Math.abs(x - x2) === 1) return [x, x2]
+      }
+    }
+    return [null, null]
+  }
+}
+
+class EMazeBlock extends MazeBlock {
+  constructor(height, width, scale) {
+    super(height, width, scale)
+  }
+
+  initInstrs() {
+    let nextRow = []
+    const rl = (this.width / this.scale - 1) / 2
+
+    for (let y = 1; y < this.grid.length; y += 2) {
+      const row = [...nextRow]
+      nextRow.length = 0
+      for (let i = 1; i < this.grid[0].length; i += 2) {
+        let dup = false
+        for (let j = 0; j < row.length; j++) {
+          const set = row[j]
+          if (set.has(i + rl * y)) dup = true
+        }
+        if (!dup) row.push(new Set([i + rl * y]))
+      }
+
+      for (let t = row.length - 1; t > 0; t--) {
+        const j = Math.floor(Math.random() * (t + 1))
+        let temp = row[t]
+        row[t] = row[j]
+        row[j] = temp
+      }
+      for (const set of row) {
+        for (const x of set) {
+          this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 0 })
+        }
+      }
+
+      if (y === this.grid.length - 2) {
+        for (let s = 0; s < row.length; s++) {
+          for (let s2 = 0; s2 < row.length; s2++) {
+            const [set, set2] = [row[s], row[s2]]
+            const [x, x2] = this.checkAdj(set, set2)
+            if (x !== null) {
+              this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 0 })
+              this.instrs.push({ x: x2 - rl * y, y, dx: 0, dy: 0 })
+              this.instrs.push({ x: x - rl * y, y, dx: (x2 - x) / 2, dy: 0 })
+              row[s] = new Set([...row[s], ...row[s2]])
+              row.splice(s2, 1)
+              s = 0
+              s2 = 0
+            }
+          }
+        }
+        continue
+      }
+
+      for (let s = 0; s < row.length; s++) {
+        for (let s2 = 0; s2 < row.length; s2++) {
+          const [set, set2] = [row[s], row[s2]]
+          const [x, x2] = this.checkAdj(set, set2)
+          if (x !== null && Math.random() < 0.5) {
+            this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 0 })
+            this.instrs.push({ x: x2 - rl * y, y, dx: 0, dy: 0 })
+            this.instrs.push({ x: x - rl * y, y, dx: (x2 - x) / 2, dy: 0 })
+            row[s] = new Set([...row[s], ...row[s2]])
+            row.splice(s2, 1)
+            if (s2 < s) s--
+          }
+        }
+      }
+
+      for (let s = 0; s < row.length; s++) {
+        const set = row[s]
+        let i = 0
+        const ri = Math.floor(Math.random() * set.size)
+
+        const nextSet = new Set()
+        for (const x of set) {
+          if (Math.random() < 0.5 || i === ri) {
+            this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 1 })
+            this.instrs.push({ x: x - rl * y, y, dx: 0, dy: 2 })
+            nextSet.add(x + rl * 2)
+          }
+          i++
+        }
+        nextRow.push(nextSet)
+      }
+    }
+  }
+
+  checkAdj(set, set2) {
+    if (set === set2) return [null, null]
+    for (const x of set) {
+      for (const x2 of set2) {
+        if (Math.abs(x - x2) === 2) return [x, x2]
+      }
+    }
+    return [null, null]
+  }
+}
