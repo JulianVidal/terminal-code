@@ -332,8 +332,8 @@ class Canvas {
    * Changes the framerate of the looped function
    * @param  {Number} frameRate The frameRate
    */
-  setFrameRate(frameRate) {
-    this.frameRate = frameRate
+  setFrameRate(fps) {
+    this.fps = fps
   }
 }
 
@@ -344,8 +344,8 @@ class Mazes {
     this.scale = scale
     this.canvas = canvas ? canvas : new Canvas(width, height)
     //this.color = '#6C49CD'
-    this.color = '#FAFAFA'
-    this.canvas.setStrokeColor(this.color)
+    this.canvas.setFrameRate(15)
+
 
     this.mazes = { 
       'BinaryTree': new BinaryTreeMaze('NE', height, width, scale, this.canvas),
@@ -376,6 +376,7 @@ class Maze {
     this.width = width
     this.scale = scale
     this.canvas = canvas ? canvas : new Canvas(width, height)
+    this.canvas.setStrokeWeight(2)
     this.grid = []
     this.x = 0
     this.y = 0
@@ -383,6 +384,9 @@ class Maze {
     this.step = 0
     this.animating = false
     this.bgColor = '#212121'
+    this.fgColor = '#3C12B5'
+    this.eColor = '#FAFAFA'
+    this.pColor = '#008B72'
     this.initGrid()
   }
 
@@ -392,7 +396,7 @@ class Maze {
       for (let x = 0; x < this.width / this.scale + 1; x++) {
         let hor = x === this.width / this.scale ? false : true
         let vert = y === this.height / this.scale ? false : true
-        let center = '#6C49CD'
+        let center = this.fgColor
         this.grid[y].push([hor, vert, center])
       }
     }
@@ -400,7 +404,12 @@ class Maze {
 
   reset() {
     this.instrs.length = 0
+    this.instrs.push({x: null})
+    this.x = 0
+    this.y = 0
     this.initInstrs()
+    this.x = 0
+    this.y = 0
     this.grid = []
     this.initGrid()
     this.animating = false
@@ -432,6 +441,8 @@ class Maze {
     this.canvas.setColor(this.bgColor)
     this.canvas.drawBackground()
     this.drawGrid()
+    this.canvas.setColor(this.pColor)
+    this.canvas.drawFilledCircle(this.x + this.scale / 2, this.y + this.scale / 2, this.scale / 4)
   }
 
   drawGrid() {
@@ -444,6 +455,7 @@ class Maze {
         let sy2 = (y + 1) * this.scale
         this.canvas.setColor(center)
         this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
+        this.canvas.setStrokeColor(this.eColor)
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
       })
@@ -452,6 +464,7 @@ class Maze {
 
   removeEdge(x, y, dx, dy, add) {
     if (x === null) return
+    if (dx === undefined){this.grid[y][x][2] = this.bgColor; return}
     const edgeSide = Math.abs(dx)
     dx = Math.max(0, dx)
     dy = Math.max(0, dy)
@@ -507,12 +520,27 @@ class Maze {
   }
 
   generateMazeAnim() {
-    if (this.animating == false) this.resetAnim()
+    if (this.animating === false) {this.resetAnim()}
     if (this.instrs.length === this.step) return true
 
-    const { x, y, dx, dy, add } = this.instrs[this.step]
-    this.grid[y][x][2] = '#212121'
+    const { x, y, dx, dy, add} = this.instrs[this.step]
+
     this.removeEdge(x, y, dx, dy, add)
+    
+    if (x === null) this.grid[0][0][2] = this.bgColor
+    if (x !== null) {
+      this.x = x * this.scale
+      this.y = y * this.scale
+      this.grid[y][x][2] = this.bgColor
+      if (this.step + 1 < this.instrs.length) {
+        if (this.instrs[this.step + 1].dx === undefined && dx !== undefined) {
+          this.step++
+          this.generateMazeAnim()
+          return
+        }
+      }
+
+    }
     this.step++
   }
 
@@ -768,8 +796,10 @@ class RecursiveBacktrackerMaze extends Maze {
         continue
 
       this.instrs.push({ x, y, dx, dy })
+      this.instrs.push({x: x + dx, y: y + dy})
       this.removeEdge(x, y, dx, dy)
       this.initInstrs(x + dx, y + dy)
+      this.instrs.push({x, y})
     }
   }
 }
