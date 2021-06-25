@@ -400,8 +400,8 @@ class Maze {
     this.initGrid()
     this.animating = false
     this.canvas.noLoop()
+    this.step = 0
   }
-
 
   resetAnim() {
     this.reset()
@@ -432,11 +432,11 @@ class Maze {
   drawGrid() {
     this.grid.forEach((col, y) => {
       col.forEach((color, x) => {
-        const [hor, vert] = col
-        let sx = x * this.scale - 1
-        let sy = y * this.scale - 1
-        let sx2 = (x + 1) * this.scale + 1
-        let sy2 = (y + 1) * this.scale + 1
+        const [hor, vert] = color
+        let sx = x * this.scale
+        let sy = y * this.scale
+        let sx2 = (x + 1) * this.scale
+        let sy2 = (y + 1) * this.scale
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
       })
