@@ -337,12 +337,42 @@ class Canvas {
   }
 }
 
-class Maze {
-  constructor(height = 500, width = 500, scale = 20) {
+class Mazes {
+  constructor(height = 500, width = 500, scale = 20, canvas) {
     this.height = height
     this.width = width
     this.scale = scale
-    this.canvas = new Canvas(width, height)
+    this.canvas = canvas ? canvas : new Canvas(width, height)
+
+    this.mazes = { 
+      'BinaryTree': new BinaryTreeMaze('NE', height, width, scale, this.canvas),
+      'AldousBroder': new AldousBroderMaze(height, width, scale, this.canvas),
+      'RecursiveBacktracker': new RecursiveBacktrackerMaze(height, width, scale, this.canvas),
+      'HuntAndKill': new HuntAndKillMaze(height, width, scale, this.canvas),
+      'Sidewinder': new RecursiveDivisionMaze(height, width, scale, this.canvas),
+      'Kruskal': new KruskalMaze(height, width, scale, this.canvas),
+      'GrowingTree': new GrowingTreeMaze(height, width, scale, this.canvas),
+      'Prim': new PrimMaze(height, width, scale, this.canvas),
+      'Wilson': new WilsonMaze(height, width, scale, this.canvas),
+      'Eller': new EllerMaze(height, width, scale, this.canvas),
+    }
+  }
+
+  drawMaze(maze) {
+    this.mazes[maze].generateMaze()
+  }
+  
+  drawMazeAnim(maze) {
+    this.mazes[maze].generateMazeAnim()
+  }
+}
+
+class Maze {
+  constructor(height = 500, width = 500, scale = 20, canvas) {
+    this.height = height
+    this.width = width
+    this.scale = scale
+    this.canvas = canvas ? canvas : new Canvas(width, height)
     this.grid = []
     this.x = 0
     this.y = 0
@@ -350,13 +380,12 @@ class Maze {
     this.step = 0
     this.animating = false
     this.initGrid()
-    this.resetStep()
   }
 
   initGrid() {
-    for (let y = 0; y <= this.height / this.scale; y++) {
+    for (let y = 0; y < this.height / this.scale + 1; y++) {
       if (!this.grid[y]) this.grid[y] = []
-      for (let x = 0; x <= this.width / this.scale; x++) {
+      for (let x = 0; x < this.width / this.scale + 1; x++) {
         let hor = x === this.width / this.scale ? false : true
         let vert = y === this.height / this.scale ? false : true
         this.grid[y].push([hor, vert])
@@ -373,16 +402,15 @@ class Maze {
     this.canvas.noLoop()
   }
 
+
   resetAnim() {
     this.reset()
-    this.step = 0
     this.animating = true
     this.canvas.loop(() => this.draw(this))
   }
 
   resetStep() {
     this.reset()
-    this.step = 0
     this.canvas.loop(() => this.draw(this))
   }
 
@@ -404,11 +432,11 @@ class Maze {
   drawGrid() {
     this.grid.forEach((col, y) => {
       col.forEach((color, x) => {
-        const [hor, vert] = color
-        let sx = x * this.scale
-        let sy = y * this.scale
-        let sx2 = (x + 1) * this.scale
-        let sy2 = (y + 1) * this.scale
+        const [hor, vert] = col
+        let sx = x * this.scale - 1
+        let sy = y * this.scale - 1
+        let sx2 = (x + 1) * this.scale + 1
+        let sy2 = (y + 1) * this.scale + 1
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
       })
@@ -489,8 +517,8 @@ class Maze {
 }
 
 class MazeBlock extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
     this.x = 1
     this.y = 1
   }
@@ -593,9 +621,9 @@ class MazeBlock extends Maze {
   }
 }
 
-class BinaryMaze extends Maze {
-  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
-    super(height, width, scale)
+class BinaryTreeMaze extends Maze {
+  constructor(dir = 'NW', height, width, scale, canvas) {
+    super(height, width, scale, canvas)
     this.dx = dir.includes('E') ? 1 : -1
     this.dy = dir.includes('S') ? 1 : -1
   }
@@ -611,9 +639,9 @@ class BinaryMaze extends Maze {
   }
 }
 
-class BinaryMazeBlock extends MazeBlock {
-  constructor(dir = 'NW', height = 500, width = 500, scale = 20) {
-    super(height, width, scale)
+class BinaryTreeMazeBlock extends MazeBlock {
+  constructor(dir = 'NW', height, width, scale, canvas) {
+    super(height, width, scale, canvas)
     this.dx = dir.includes('E') ? 1 : -1
     this.dy = dir.includes('S') ? 1 : -1
   }
@@ -630,9 +658,9 @@ class BinaryMazeBlock extends MazeBlock {
   }
 }
 
-class ABMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class AldousBroderMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
 
     this.totalSize = (height / scale) * (width / scale)
   }
@@ -668,9 +696,9 @@ class ABMaze extends Maze {
   }
 }
 
-class ABMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class AldousBroderBMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
 
     this.totalSize = ((height / scale - 1) / 2) * ((width / scale - 1) / 2)
   }
@@ -708,9 +736,9 @@ class ABMazeBlock extends MazeBlock {
   }
 }
 
-class RBMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class RecursiveBacktrackerMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs(x = this.x, y = this.y) {
@@ -738,12 +766,12 @@ class RBMaze extends Maze {
   }
 }
 
-class RBMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class RecursiveBacktrackerMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
-  initInstrs(x = this.x, y = this.y) {
+  initInstrs(x = 1, y = 1) {
     const directions = this.randomDirections()
 
     for (let i = 0; i < 4; i++) {
@@ -770,9 +798,9 @@ class RBMazeBlock extends MazeBlock {
   }
 }
 
-class HAKMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class HuntAndKillMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
 
     const cords = this.randomCord()
     this.x = cords[0]
@@ -797,7 +825,6 @@ class HAKMaze extends Maze {
       ) {
         ;[x, y] = this.scanForUnvisited(visited)
         if (x === null) {
-          console.log(visited)
           return
         }
       }
@@ -853,9 +880,9 @@ class HAKMaze extends Maze {
   }
 }
 
-class HAKMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class HuntAndKillMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
 
     const cords = this.randomCord()
     this.x = cords[0]
@@ -882,7 +909,6 @@ class HAKMazeBlock extends MazeBlock {
       ) {
         ;[x, y] = this.scanForUnvisited(visited)
         if (x === null) {
-          console.log(visited)
           return
         }
       }
@@ -938,9 +964,9 @@ class HAKMazeBlock extends MazeBlock {
   }
 }
 
-class SWMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class SidewinderMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -966,9 +992,9 @@ class SWMaze extends Maze {
   }
 }
 
-class SWMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class SidewinderMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -994,9 +1020,9 @@ class SWMazeBlock extends MazeBlock {
   }
 }
 
-class RDMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class RecursiveDivisionMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initGrid() {
@@ -1061,9 +1087,9 @@ class RDMaze extends Maze {
   }
 }
 
-class RDMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class RecursiveDivisionMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initGrid() {
@@ -1142,9 +1168,9 @@ class RDMazeBlock extends MazeBlock {
   }
 }
 
-class KMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class KruskalMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1180,9 +1206,9 @@ class KMaze extends Maze {
   }
 }
 
-class KMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class KruskalMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1220,9 +1246,9 @@ class KMazeBlock extends MazeBlock {
   }
 }
 
-class GTMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class GrowingTreeMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1266,9 +1292,9 @@ class GTMaze extends Maze {
   }
 }
 
-class GTMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class GrowingTreeMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1313,9 +1339,9 @@ class GTMazeBlock extends MazeBlock {
   }
 }
 
-class PMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class PrimMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1359,9 +1385,9 @@ class PMaze extends Maze {
   }
 }
 
-class PMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class PrimMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1407,9 +1433,9 @@ class PMazeBlock extends MazeBlock {
   }
 }
 
-class WMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class WilsonMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
     this.totalSize = (height / scale) * (width / scale)
   }
 
@@ -1464,9 +1490,9 @@ class WMaze extends Maze {
   }
 }
 
-class WMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class WilsonMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
     this.totalSize = ((height / scale - 1) / 2) * ((width / scale - 1) / 2)
   }
 
@@ -1523,9 +1549,9 @@ class WMazeBlock extends MazeBlock {
   }
 }
 
-class EMaze extends Maze {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class EllerMaze extends Maze {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
@@ -1609,9 +1635,9 @@ class EMaze extends Maze {
   }
 }
 
-class EMazeBlock extends MazeBlock {
-  constructor(height, width, scale) {
-    super(height, width, scale)
+class EllerMazeBlock extends MazeBlock {
+  constructor(height, width, scale, canvas) {
+    super(height, width, scale, canvas)
   }
 
   initInstrs() {
