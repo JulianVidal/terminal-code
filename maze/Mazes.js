@@ -442,10 +442,10 @@ class Maze {
         let sy = y * this.scale
         let sx2 = (x + 1) * this.scale
         let sy2 = (y + 1) * this.scale
+        this.canvas.setColor(center)
+        this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
-        this.canvas.setColor(center)
-        //this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
       })
     })
   }
@@ -511,7 +511,7 @@ class Maze {
     if (this.instrs.length === this.step) return true
 
     const { x, y, dx, dy, add } = this.instrs[this.step]
-    //this.grid[x][y][2] = '#212121'
+    this.grid[y][x][2] = '#212121'
     this.removeEdge(x, y, dx, dy, add)
     this.step++
   }
