@@ -343,6 +343,9 @@ class Mazes {
     this.width = width
     this.scale = scale
     this.canvas = canvas ? canvas : new Canvas(width, height)
+    //this.color = '#6C49CD'
+    this.color = '#FAFAFA'
+    this.canvas.setStrokeColor(this.color)
 
     this.mazes = { 
       'BinaryTree': new BinaryTreeMaze('NE', height, width, scale, this.canvas),
@@ -379,6 +382,7 @@ class Maze {
     this.instrs = []
     this.step = 0
     this.animating = false
+    this.bgColor = '#212121'
     this.initGrid()
   }
 
@@ -388,7 +392,8 @@ class Maze {
       for (let x = 0; x < this.width / this.scale + 1; x++) {
         let hor = x === this.width / this.scale ? false : true
         let vert = y === this.height / this.scale ? false : true
-        this.grid[y].push([hor, vert])
+        let center = '#6C49CD'
+        this.grid[y].push([hor, vert, center])
       }
     }
   }
@@ -415,7 +420,7 @@ class Maze {
   }
 
   draw() {
-    this.canvas.setColor('#FFF')
+    this.canvas.setColor(this.bgColor)
     this.canvas.drawBackground()
     this.drawGrid()
     if (this.animating) {
@@ -424,7 +429,7 @@ class Maze {
         this.canvas.noLoop()
       }
     }
-    this.canvas.setColor('#FFF')
+    this.canvas.setColor(this.bgColor)
     this.canvas.drawBackground()
     this.drawGrid()
   }
@@ -432,13 +437,15 @@ class Maze {
   drawGrid() {
     this.grid.forEach((col, y) => {
       col.forEach((color, x) => {
-        const [hor, vert] = color
+        const [hor, vert, center] = color
         let sx = x * this.scale
         let sy = y * this.scale
         let sx2 = (x + 1) * this.scale
         let sy2 = (y + 1) * this.scale
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
+        this.canvas.setColor(center)
+        //this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
       })
     })
   }
@@ -504,6 +511,7 @@ class Maze {
     if (this.instrs.length === this.step) return true
 
     const { x, y, dx, dy, add } = this.instrs[this.step]
+    //this.grid[x][y][2] = '#212121'
     this.removeEdge(x, y, dx, dy, add)
     this.step++
   }
