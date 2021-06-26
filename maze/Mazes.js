@@ -352,7 +352,8 @@ class Mazes {
       'AldousBroder': new AldousBroderMaze(height, width, scale, this.canvas),
       'RecursiveBacktracker': new RecursiveBacktrackerMaze(height, width, scale, this.canvas),
       'HuntAndKill': new HuntAndKillMaze(height, width, scale, this.canvas),
-      'Sidewinder': new RecursiveDivisionMaze(height, width, scale, this.canvas),
+      'RecursiveDivision': new RecursiveDivisionMaze(height, width, scale, this.canvas),
+      'Sidewinder': new SidewinderMaze(height, width, scale, this.canvas),
       'Kruskal': new KruskalMaze(height, width, scale, this.canvas),
       'GrowingTree': new GrowingTreeMaze(height, width, scale, this.canvas),
       'Prim': new PrimMaze(height, width, scale, this.canvas),
@@ -390,12 +391,13 @@ class Maze {
     this.initGrid()
   }
 
-  initGrid() {
+  initGrid(temp) {
+    let a = temp ? false : true
     for (let y = 0; y < this.height / this.scale + 1; y++) {
       if (!this.grid[y]) this.grid[y] = []
       for (let x = 0; x < this.width / this.scale + 1; x++) {
-        let hor = x === this.width / this.scale ? false : true
-        let vert = y === this.height / this.scale ? false : true
+        let hor = x === this.width / this.scale ? false : a
+        let vert = y === this.height / this.scale ? false : a
         let center = this.fgColor
         this.grid[y].push([hor, vert, center])
       }
@@ -405,13 +407,12 @@ class Maze {
   reset() {
     this.instrs.length = 0
     this.instrs.push({x: null})
+    this.instrs.push({x: null})
     this.x = 0
     this.y = 0
     this.initInstrs()
-    this.x = 0
-    this.y = 0
     this.grid = []
-    this.initGrid()
+    this.initGrid(true)
     this.animating = false
     this.canvas.noLoop()
     this.step = 0
@@ -454,7 +455,7 @@ class Maze {
         let sx2 = (x + 1) * this.scale
         let sy2 = (y + 1) * this.scale
         this.canvas.setColor(center)
-        this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
+        // this.canvas.drawFilledRectangle(x * this.scale, y * this.scale, this.scale, this.scale)
         this.canvas.setStrokeColor(this.eColor)
         if (hor) this.canvas.drawLine(sx, sy, sx2, sy)
         if (vert) this.canvas.drawLine(sx, sy, sx, sy2)
@@ -471,6 +472,25 @@ class Maze {
 
     this.grid[y + dy][x + dx][edgeSide] = add === undefined ? false : true
   }
+
+  removeEdgeB(x, y, dx, dy, add) {
+    if (x === null) return
+    if (dx === undefined){this.grid[y][x][2] = this.bgColor; return}
+
+    this.grid[y + dy][x + dx][0] = true
+    this.grid[y + dy][x + dx][1] = true
+    this.grid[y + dy + 1][x + dx][0] = true
+    this.grid[y + dy][x + dx + 1][1] = true
+
+    const edgeSide = Math.abs(dx)
+    dx = Math.max(0, dx)
+    dy = Math.max(0, dy)
+    
+    this.grid[y + dy][x + dx][edgeSide] = add === undefined ? false : true
+
+  }
+
+
 
   randomDirection() {
     let dx = 0
@@ -525,13 +545,15 @@ class Maze {
 
     const { x, y, dx, dy, add} = this.instrs[this.step]
 
-    this.removeEdge(x, y, dx, dy, add)
+    this.removeEdgeB(x, y, dx, dy, add)
     
-    if (x === null) this.grid[0][0][2] = this.bgColor
+    if (x === null) this.grid[this.y][this.x][2] = this.bgColor
     if (x !== null) {
       this.x = x * this.scale
       this.y = y * this.scale
       this.grid[y][x][2] = this.bgColor
+      if (dx !== undefined) this.grid[y + dy][x + dx][2] = this.bgColor
+
       if (this.step + 1 < this.instrs.length) {
         if (this.instrs[this.step + 1].dx === undefined && dx !== undefined) {
           this.step++
@@ -1387,6 +1409,8 @@ class PrimMaze extends Maze {
     const visited = new Set()
     visited.add(x + ',' + y)
     let marked = new Set()
+    this.x = x
+    this.y = y
     marked = this.addMarked(visited, x, y, marked)
 
     while (marked.size > 0) {
