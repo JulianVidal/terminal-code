@@ -443,7 +443,7 @@ class Maze {
     this.canvas.drawBackground()
     this.drawGrid()
     this.canvas.setColor(this.pColor)
-    this.canvas.drawFilledCircle(this.x + this.scale / 2, this.y + this.scale / 2, this.scale / 4)
+    this.canvas.drawFilledCircle(this.x * this.scale + this.scale / 2, this.y * this.scale + this.scale / 2, this.scale / 4)
   }
 
   drawGrid() {
@@ -463,9 +463,9 @@ class Maze {
     })
   }
 
-  removeEdge(x, y, dx, dy, add) {
+  removeEdge(x, y, dx, dy, add, c) {
     if (x === null) return
-    if (dx === undefined){this.grid[y][x][2] = this.bgColor; return}
+    if (dx === undefined){ return}
     const edgeSide = Math.abs(dx)
     dx = Math.max(0, dx)
     dy = Math.max(0, dy)
@@ -514,9 +514,11 @@ class Maze {
 
   generateMaze() {
     this.reset()
-    this.instrs.forEach(({ x, y, dx, dy, add }) =>
+    for (const { x, y, dx, dy, add } of this.instrs) {
       this.removeEdge(x, y, dx, dy, add)
-    )
+      if (x !== null) this.grid[y][x][2] = this.bgColor
+      if (dx !== undefined && y + dy >= 0 && x + dx >= 0) this.grid[y + dy][x + dx][2] = this.bgColor
+    }
     this.draw()
   }
 
@@ -524,16 +526,16 @@ class Maze {
     if (this.animating === false) {this.resetAnim()}
     if (this.instrs.length === this.step) return true
 
-    const { x, y, dx, dy, add} = this.instrs[this.step]
+    const { x, y, dx, dy, add, c} = this.instrs[this.step]
 
-    this.removeEdge(x, y, dx, dy, add)
+    this.removeEdge(x, y, dx, dy, add, c)
     
-    if (x === null) this.grid[this.y][this.x][2] = this.bgColor
+    // if (x === null) this.grid[this.y][this.x][2] = this.bgColor
     if (x !== null) {
-      this.x = x * this.scale
-      this.y = y * this.scale
-      this.grid[y][x][2] = this.bgColor
-      if (dx !== undefined) this.grid[y + dy][x + dx][2] = this.bgColor
+      this.x = x
+      this.y = y
+      if (!c) this.grid[y][x][2] = this.bgColor
+      if (dx !== undefined && y + dy >= 0 && x + dx >= 0 && !c) this.grid[y + dy][x + dx][2] = this.bgColor
 
       if (this.step + 1 < this.instrs.length) {
         if (this.instrs[this.step + 1].dx === undefined && dx !== undefined) {
@@ -594,14 +596,15 @@ class AldousBroderMaze extends Maze {
         y + dy >= this.height / this.scale ||
         x + dx >= this.width / this.scale
       ) {
-        ;[dx, dy] = this.randomDirection()
+        [dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
 
       if (visited.has(x + ',' + y)) {
-        this.instrs.push({ x: null })
+        //this.instrs.push({ x: null })
+        this.instrs.push({x, y})
         continue
       }
 
@@ -724,6 +727,7 @@ class HuntAndKillMaze extends Maze {
     return [null, null]
   }
 }
+
 class SidewinderMaze extends Maze {
   constructor(height, width, scale, canvas) {
     super(height, width, scale, canvas)
@@ -736,6 +740,7 @@ class SidewinderMaze extends Maze {
         run.push([x, y])
         if (Math.random() < 0.5) {
           this.instrs.push({ x, y, dx: 1, dy: 0 })
+          this.instrs.push({ x: x + 1, y})
         } else {
           const [rx, ry] = run[Math.floor(Math.random() * run.length)]
           this.instrs.push({ x: rx, y: ry, dx: 0, dy: -1 })
@@ -849,7 +854,10 @@ class KruskalMaze extends Maze {
       const id2 = ids[x + dx + ',' + (y + dy)]
 
       if (id === id2) continue
-      this.instrs.push({ x, y, dx, dy })
+      this.instrs.push({x, y})
+      this.instrs.push({ x, y, dx, dy})
+      this.instrs.push({x: x + dx, y: y + dy})
+
       Object.keys(ids).forEach((key) => {
         if (ids[key] === id2) ids[key] = id
       })
@@ -898,6 +906,7 @@ class GrowingTreeMaze extends Maze {
       y += dy
       visited.add(x + ',' + y)
       this.instrs.push({ x, y, dx: -dx, dy: -dy })
+      this.instrs.push({ x, y, dx, dy})
       path.push([x, y])
     }
   }
@@ -933,6 +942,7 @@ class PrimMaze extends Maze {
         }
       }
     }
+
   }
 
   addMarked(visited, x, y, marked) {
@@ -993,6 +1003,7 @@ class WilsonMaze extends Maze {
       this.instrs.push({ x: null })
       x += dx
       y += dy
+      this.instrs.push({x, y, c: true})
 
       if (visited.has(x + ',' + y)) {
         let [tx, ty] = start
@@ -1043,11 +1054,13 @@ class EllerMaze extends Maze {
             const [x, x2] = this.checkAdj(set, set2)
             if (x !== null) {
               this.instrs.push({ x: x - rl * y, y, dx: x2 - x, dy: 0 })
+              if (y === 0) this.instrs.push({x: x2, y})
+              if (y === 0) this.instrs.push({x, y})
               row[s] = new Set([...row[s], ...row[s2]])
               row.splice(s2, 1)
               s = 0
               s2 = 0
-            }
+            } 
           }
         }
         continue
@@ -1058,6 +1071,8 @@ class EllerMaze extends Maze {
           const [x, x2] = this.checkAdj(set, set2)
           if (x !== null && Math.random() < 0.5) {
             this.instrs.push({ x: x - rl * y, y, dx: x2 - x, dy: 0 })
+            if (y === 0) this.instrs.push({x: x2, y})
+            if (y === 0) this.instrs.push({x, y})
             row[s] = new Set([...row[s], ...row[s2]])
             row.splice(s2, 1)
             if (s2 < s) s--
