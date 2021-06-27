@@ -15,11 +15,16 @@ private:
 public:
 
   //Constructor (position in x and position in y)
-  chest() 
+  chest(int x, int y) 
   
   {
     
+    //Pushes the position passed in into the pos vector
+    pos.push_back(x);
+    pos.push_back(y);
 
+    //Chest will always start at close
+    state = 0;
   
   }
 

@@ -4,8 +4,14 @@ private:
   std::vector <object> items;
 
 public:
-  merchant(){
+  merchant(int x, int y, std::vector<object> itemsObject){
+    pos.push_back(x);
+    pos.push_back(y);
 
+    for (int e = 0; e < itemsObject.size(); e++)
+    {
+      items.push_back(itemsObject[e]);
+    }
   }
 
   void make(int x, int y, std::vector<object> itemsObject)

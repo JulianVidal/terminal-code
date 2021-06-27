@@ -19,11 +19,22 @@ private:
 public:
 
   //Constructor (position in x, position in y, stage enemy is on)
-  enemy() 
+  enemy(int x, int y, int stage = 1) 
   
   {
 
+    //Starts the position of the enemy with the give x, y
+    pos.push_back(x);
+    pos.push_back(y);
 
+    //Health of the enemy is based on the stage
+    health = stage;
+
+    //Damage is that the enemy does stage + 1 / 2
+    damage = floor((stage + 1) / 2);
+
+    //Enemy will always start alive
+    state = 0;
   
   }
 

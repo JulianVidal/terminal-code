@@ -14,7 +14,7 @@
 #include "warrior.hpp"
 #include "object.hpp"
 #include "merchant.hpp"
-#include "stage.hpp"
+//#include "stage.hpp"
 
 //Height and width of the map
 #define HEIGHT 5
@@ -146,14 +146,21 @@ std::vector<object> hotBar;
 //Variables starting with current hold what should be printed based on the stage
 int currentStage[] = {0, 0};
 
-/*int currentChest[] = {0, 0};
+int currentChest[] = {0, 0};
 
 int currentEnemy[] = {0, 0};
 
-int currentTrader[] = {0, 0};*/
+int currentTrader[] = {0, 0};
 
 //Holds all the stages visited by the player, helps with adding new stages
 std::vector<std::vector<int> > stagesVisited;
+
+
+//A vector that will hold all the chests
+std::vector< std::vector <merchant> > tradersVec;
+std::vector< std::vector <chest> > chestsVec;
+std::vector< std::vector <enemy> > enemyVec;
+
 
 //The initial position of the player
 warrior player((WIDTH / 2), (HEIGHT / 2));
@@ -163,7 +170,7 @@ warrior player((WIDTH / 2), (HEIGHT / 2));
 std::vector< std::vector <chest> > chestsVec;
 std::vector< std::vector <enemy> > enemyVec;*/
 
-std::vector<std::vector<stage> > stagesVec;
+//std::vector<std::vector<stage> > stagesVec;
 
 /* 
 A function that will check if and how much of an item there is inside the inventory vector
@@ -342,10 +349,10 @@ void terrainFunc()
       currentStage[0],
       currentStage[1],
       player.getPos(),
-      stagesVec[currentStage[0]][currentStage[1]].getChest().getPos(),
-      stagesVec[currentStage[0]][currentStage[1]].getEnemy().getPos(),
-      stagesVec[currentStage[0]][currentStage[1]].getEnemy().getState(),
-      stagesVec[currentStage[0]][currentStage[1]].getMerchant().getPos());
+      chestsVec[currentStage[0]][currentStage[1]].getPos(),
+      enemyVec[currentStage[0]][currentStage[1]].getPos(),
+      enemyVec[currentStage[0]][currentStage[1]].getState(),
+      tradersVec[currentStage[0]][currentStage[1]].getPos());
 
   //Prints the amount of health the player has
   for (int d = 0; d < player.getHealth(); d++)
@@ -443,14 +450,14 @@ void setup()
   buyItems.push_back(items[3]);
 
   //Creates a chest vector that will be pushed into the chest vectors array
-  /*std::vector <chest> chestNewVec;
-  chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));*/
+  std::vector <chest> chestNewVec;
+  chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
   //std::vector<stage> stageNewVec;
   //stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
 
   //Checks if the merchant and the chest has the same position
-  /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
+  if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
   
   {
 
@@ -458,27 +465,27 @@ void setup()
     chestNewVec.erase(chestNewVec.begin());
     chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-  }*/
+  }
 
   //Pushes a new chest into the chest vector
-  //chestsVec.push_back(chestNewVec);
+  chestsVec.push_back(chestNewVec);
 
   //Creates an enemy vector that will be pushed into the enemy vector
-  //std::vector<enemy> enemyNewVec;
-  //enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
+  std::vector<enemy> enemyNewVec;
+  enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
-  /*if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
+  if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
     enemyNewVec.erase(enemyNewVec.begin());
     enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
-  }*/
+  }
 
   //Pushes the enemy vector into the enemy vector
-  //enemyVec.push_back(enemyNewVec);
+  enemyVec.push_back(enemyNewVec);
 
   //Checks if the enemy has the position as the chest
-  /*if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[0] == chestsVec[currentChest[0]][currentChest[1]].getPos()[0] && enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[1] == chestsVec[currentChest[0]][currentChest[1]].getPos()[1])
+  if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[0] == chestsVec[currentChest[0]][currentChest[1]].getPos()[0] && enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[1] == chestsVec[currentChest[0]][currentChest[1]].getPos()[1])
 
   {
 
@@ -486,132 +493,96 @@ void setup()
   // Chest(6, 4), enemy(6 -> 3, 4 -> 2)
   enemyVec[currentEnemy[0]][currentEnemy[1]].setPos(round(chestsVec[currentChest[0]][currentChest[1]].getPos()[0] / 2), round(chestsVec[currentChest[0]][currentChest[1]].getPos()[1] / 2));
 
-  }*/
+  }
 
   //creates a trade vector that will be pushed into the trade vector
-  //std::vector <merchant> traderNewVec;
-  //traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
-  //tradersVec.push_back(traderNewVec);
+  std::vector <merchant> traderNewVec;
+  traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
+  tradersVec.push_back(traderNewVec);
 
   /*Items used for testing at the begining of the game*/
-  /*inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
+  inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
   inventory.push_back(object("Golden Sword", 0, 2, typesOfItems[2], 2, quality[0]));
   inventory.push_back(object("Iron Sword", 0, 3, typesOfItems[2], 3, quality[0]));
   inventoryQuantity.push_back(20);
   inventoryQuantity.push_back(20);
-  inventoryQuantity.push_back(20);*/
+  inventoryQuantity.push_back(20);
 
   //Pushes the first visited currentStage which is the one we start with(0, 0)
-  //std::vector<int> vec(2, 0);
-  //stagesVisited.push_back(vec);
+  std::vector<int> vec(2, 0);
+  stagesVisited.push_back(vec);
 }
 
 //Checks the player is on a new stage, if so it will add a chest and enemy
-void checkStage()
-
-{
+void checkStage() {
 
   //Hold the value of whether or not the player is on a new stage
   int newStage = 0;
 
   //Iterates through the stages that have already been visited
-  for (int h = 0; h < stagesVisited.size(); h++)
+  for (int h = 0; h < stagesVisited.size(); h++) {
 
-  {
-
-    //Checks if the stage the player is on
+    //Checks if the stage the player is on is
     if (currentStage[0] != stagesVisited[h][0] || currentStage[1] != stagesVisited[h][1])
-
     {
-
       //Adds to newStage if the current stage is different from one of the stages visited
       newStage++;
+
     }
   }
 
   //If newstage's value is equal to the amount of stage visited then it is a new stage
-  if (newStage == stagesVisited.size())
-
-  {
-
+  if (newStage == stagesVisited.size()) {
     randomItemQuality();
+    if (currentStage[0] % 10 == 0 && currentStage[1] % 10 == 0) {
 
-    /*if (currentStage[0] % 10 == 0 && currentStage[1] % 10 == 0) 
-    
-    {
-
-      //Creates trade vector that is pushed into the trade vector
-      //std::vector <merchant> traderNewVec;
-      //traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
+      std::vector <merchant> traderNewVec;
+      traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
       tradersVec.push_back(traderNewVec);
+    }
+    //Adds a new chest to the chests vector
+    if (currentStage[0] >= chestsVec.size()) {
 
-    }*/
+      std::vector <chest> chestNewVec;
+      chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-    //Adds a new chest, enemy and trader if there is a new x axis
-    //Checks if there is a new x axis
-    if (currentStage[0] >= stagesVec.size())
+      if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
-    {
-
-      //Creates a chest vector that will be pushed into the chest vector
-      std::vector<stage> stageNewVec;
-      stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
-
-      //Checks if the chest has the same position as the merchant
-      /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
-      
-      {
-
-        //If the merchant and chest have the same position then the chest will chose a new position
         chestNewVec.erase(chestNewVec.begin());
         chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-      }*/
+      }
 
       //Pushes a new chest into the chest vector
-      stagesVec.push_back(stageNewVec);
+      chestsVec.push_back(chestNewVec);
 
-      //Creates an enemy vector that will be pushed into the enemy vector
-      /*std::vector <enemy> enemyNewVec;
+      std::vector <enemy> enemyNewVec;
       enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT, (currentStage[0] + currentStage[1])));
 
-      //Checks if the trader has the same position as the enemy
-      if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
-      
-      {
+      if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
-        //If merchant and enemy has the position then the enemy chooses a new position  
         enemyNewVec.erase(enemyNewVec.begin());
         enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
       }
 
-      //Pushes the enemy vector into the enemy vector
       enemyVec.push_back(enemyNewVec);
-*/
-    }
 
-    else
 
-    {
 
-      /*Adds a new chest, enemy and trade if there is a new y axis*/
+    } else {
 
-      //chestsVec[currentStage[0]].push_back(chest(rand() % WIDTH, rand() % HEIGHT));
-      stagesVec[currentStage[0]].push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
-      //enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
-    }
+      chestsVec[currentStage[0]].push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-    //Checks if the trader has the same position as the enemy
-    /*if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos() == chestsVec[currentChest[0]][currentChest[1]].getPos()) 
+      enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
     
-    {
+    }
 
-      //If the enemy has the same position then the enemy will take 1/2 the position of the trader
-      //Enemy(6, 4), enemy(6 -> 3, 4 -> 2)
+
+
+    if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos() == chestsVec[currentChest[0]][currentChest[1]].getPos()) {
       enemyVec[currentEnemy[0]][currentEnemy[1]].setPos(round(chestsVec[currentChest[0]][currentChest[1]].getPos()[0]/2) , round(chestsVec[currentChest[0]][currentChest[1]].getPos()[1]/2));
-    
-    }*/
+    }
 
     //Pushes the current stage into the stagesVisited vector
     std::vector<int> vec;
@@ -620,20 +591,14 @@ void checkStage()
     stagesVisited.push_back(vec);
   }
 
-  //Attempted fix of game crashing due to not having enought stages
-  /*int extra = (abs(currentStage[1]) - stagesVisited[currentStage[0]].size());
-
+  int extra = (abs(currentStage[1]) - stagesVisited[currentStage[0]].size());
   std::cout << extra;
-
   for (int h = 0; h < extra; h++)
-
   {
-
     chestsVec[currentStage[0]].push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
     enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
-
-  }*/
+  }
 }
 
 void addToInventory(object item)

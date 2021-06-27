@@ -14,7 +14,7 @@
 #include "warrior.hpp"
 #include "object.hpp"
 #include "merchant.hpp"
-#include "stage.hpp"
+//include "stage.hpp"
 
 //Height and width of the map(marked with #)
 #define HEIGHT 5
@@ -306,13 +306,13 @@ void terrainFunc() {
     currentStage[0],
     currentStage[1],
     player.getPos(),
-    player.getHealth(),
-    player.getDamage(),
+    // player.getHealth(),
+    // player.getDamage(),
     chestsVec[currentChest[0]][currentChest[1]].getPos(),
     enemyVec[currentEnemy[0]][currentEnemy[1]].getPos(),
     enemyVec[currentEnemy[0]][currentEnemy[1]].getState(),
-    enemyVec[currentEnemy[0]][currentEnemy[1]].getHealth(),
-    enemyVec[currentEnemy[0]][currentEnemy[1]].getDamage(),
+    // enemyVec[currentEnemy[0]][currentEnemy[1]].getHealth(),
+    // enemyVec[currentEnemy[0]][currentEnemy[1]].getDamage(),
     tradersVec[currentTrader[0]][currentTrader[1]].getPos()
   );
 
@@ -371,19 +371,24 @@ void setup() {
   srand(time(0));
 
   randomItemQuality();
+
   buyItems.push_back(items[0]);
   buyItems.push_back(items[1]);
   buyItems.push_back(items[3]);
 
+
+  std::vector <merchant> traderNewVec;
+  traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
+  tradersVec.push_back(traderNewVec);
+
   std::vector <chest> chestNewVec;
   chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
-
-  /*if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
+  if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
     chestNewVec.erase(chestNewVec.begin());
     chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-  }*/
+  }
 
   //Pushes a new chest into the chest vector
   chestsVec.push_back(chestNewVec);
@@ -393,12 +398,12 @@ void setup() {
 
   //Pushes a new enemy into the enemy vector
 
-  /*if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
+  if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
     enemyNewVec.erase(enemyNewVec.begin());
     enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
-  }*/
+  }
 
   enemyVec.push_back(enemyNewVec);
 
@@ -407,9 +412,7 @@ void setup() {
     enemyVec[currentEnemy[0]][currentEnemy[1]].setPos(round(chestsVec[currentChest[0]][currentChest[1]].getPos()[0]/2) , round(chestsVec[currentChest[0]][currentChest[1]].getPos()[1]/2));
 
   }
-  std::vector <merchant> traderNewVec;
-  traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
-  tradersVec.push_back(traderNewVec);
+
 
   inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
   inventory.push_back(object("Golden Sword", 0, 2, typesOfItems[2], 2, quality[0]));
@@ -803,7 +806,8 @@ void usePrint()
 
   }
 }
-/*void use() {
+
+void use() {
   
   std::string useItemIndex;
 
@@ -896,7 +900,7 @@ void usePrint()
 
   }
   
-}*/
+}
 
 void sell() {
   int count = 0;
@@ -1065,7 +1069,6 @@ void buy() {
 
 //All the actions that need to be shown after drawing the board
 void printingActions() { 
- /*
   if (action.compare(balanceAction) == 0) {
     int balance = checkInventory(items[2]);
     std::cout << "You have a balance of " << balance << std::endl;
@@ -1095,7 +1098,7 @@ void printingActions() {
           if (tradersVec[currentTrader[0]][currentTrader[1]].getItems()[e].getQuality().compare("none") != 0) {
             std::cout << tradersVec[currentTrader[0]][currentTrader[1]].getItems()[e].getQuality() << " ";
           }
-           std::cout << tradersVec[currentTrader[0]][currentTrader[1]].getItems()[e].getName() << std::endl;
+            std::cout << tradersVec[currentTrader[0]][currentTrader[1]].getItems()[e].getName() << std::endl;
         }
 
         buy();
@@ -1213,7 +1216,6 @@ void printingActions() {
     use();
 
   }
-*/
 }
 
 //All the actions that need to done before drawing the board to be smooth
@@ -1524,7 +1526,7 @@ void draw()
   }
 
   if (inventoryShow == true) {
-     mvprintw(0, 0, "In your inventory: ");
+    mvprintw(0, 0, "In your inventory: ");
     inventoryPrint();
   }
 
