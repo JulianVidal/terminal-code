@@ -18,7 +18,7 @@
 
 //Height and width of the map
 #define HEIGHT 5
-#define WIDTH  7
+#define WIDTH 7
 
 //Keeps track if the game is over, if so the program will stop
 bool gameOver = false;
@@ -58,11 +58,11 @@ int choice;
 int type;
 
 //Array holding different types of items for futures expansion
-std::string typesOfItems[]  =  {"Potion", "Item", "useItem", "Currency"};
+std::string typesOfItems[] = {"Potion", "Item", "useItem", "Currency"};
 
 //Array holding the qualities that an item can have if any.
-std::string quality[]       =  {"Excellent", "Good", "Ok", "Bad", "Almost broken"};
-int qualityAmount = (sizeof(quality)/sizeof(quality[0]));
+std::string quality[] = {"Excellent", "Good", "Ok", "Bad", "Almost broken"};
+int qualityAmount = (sizeof(quality) / sizeof(quality[0]));
 
 /*All items in the game stored on the array, each with a
 ** Name
@@ -72,91 +72,79 @@ int qualityAmount = (sizeof(quality)/sizeof(quality[0]));
 ** Value of the object
 ** Quality of the object based on the quality array, "none" by defaut
 */
-object items[]   =    
-                  {
-                    object(
-                      "Iron Sword",
-                      0,
-                      3,
-                      typesOfItems[2],
-                      3,
-                      quality[rand() % qualityAmount]
-                    ),
-                    object(
-                      "Golden Sword",
-                      0,
-                      2,
-                      typesOfItems[2],
-                      2,
-                      quality[rand() % qualityAmount]
-                    ),
+object items[] =
+    {
+        object(
+            "Iron Sword",
+            0,
+            3,
+            typesOfItems[2],
+            3,
+            quality[rand() % qualityAmount]),
+        object(
+            "Golden Sword",
+            0,
+            2,
+            typesOfItems[2],
+            2,
+            quality[rand() % qualityAmount]),
 
-                    object(
-                      "Golden Coin",
-                      0,
-                      0,
-                      typesOfItems[3],
-                      1
-                    ),
+        object(
+            "Golden Coin",
+            0,
+            0,
+            typesOfItems[3],
+            1),
 
-                    object(
-                      "Health Potion",
-                      1,
-                      0,
-                      typesOfItems[0],
-                      2
-                    ),
-                    object(
-                      "Piece of flesh",
-                      0,
-                      0,
-                      typesOfItems[1],
-                      1
-                    ),
+        object(
+            "Health Potion",
+            1,
+            0,
+            typesOfItems[0],
+            2),
+        object(
+            "Piece of flesh",
+            0,
+            0,
+            typesOfItems[1],
+            1),
 
-                    object(
-                      "Eye",
-                      0,
-                      0,
-                      typesOfItems[1],
-                      1
-                    )
-                  };
-
+        object(
+            "Eye",
+            0,
+            0,
+            typesOfItems[1],
+            1)};
 
 //Holds the items of a chest based on the items array
-object  chestContent[]  =  {
-                            items[0],
+object chestContent[] = {
+    items[0],
 
-                            items[1],
+    items[1],
 
-                            items[2],
+    items[2],
 
-                            items[3]
-                          };
+    items[3]};
 
 //Holds the items an enemy drops based on the items array
-object  enemyContent[]  =  {
-                            items[4],
-                            items[5]
-                           };
+object enemyContent[] = {
+    items[4],
+    items[5]};
 
 //Variables that holds what a merchant will sell
-std::vector <object> buyItems;
+std::vector<object> buyItems;
 
 //Stores all items found by the player(chest, merchant, enemy)
-std::vector <object> inventory;
+std::vector<object> inventory;
 
 //How much of each item
-std::vector <int>    inventoryQuantity;
+std::vector<int> inventoryQuantity;
 
 //Stores the item being use(sword)
-std::vector <object> hotBar;
+std::vector<object> hotBar;
 
 //Variables starting with current hold what should be printed based on the stage
-int currentStage[]  =  {0, 0};
-
-
+int currentStage[] = {0, 0};
 
 /*int currentChest[] = {0, 0};
 
@@ -165,35 +153,34 @@ int currentEnemy[] = {0, 0};
 int currentTrader[] = {0, 0};*/
 
 //Holds all the stages visited by the player, helps with adding new stages
-std::vector< std::vector<int> > stagesVisited;
+std::vector<std::vector<int> > stagesVisited;
 
 //The initial position of the player
 warrior player((WIDTH / 2), (HEIGHT / 2));
-
 
 //2D Vectors that will hold what entity to print based on current variables
 /*std::vector< std::vector <merchant> > tradersVec;
 std::vector< std::vector <chest> > chestsVec;
 std::vector< std::vector <enemy> > enemyVec;*/
 
-std::vector< std::vector <stage> > stagesVec;
+std::vector<std::vector<stage> > stagesVec;
 
 /* 
 A function that will check if and how much of an item there is inside the inventory vector
 Used when buying items from the merchant and checking for coins
 Needs an object to be passed in
 */
-int checkInventory(object item) 
+int checkInventory(object item)
 
 {
 
   //Loop through every item in the inventory
-  for (int k = 0; k < inventory.size(); k++) 
+  for (int k = 0; k < inventory.size(); k++)
 
   {
 
     //Compares the item name with the one passed in the function parameters
-    if (item.getName().compare(inventory[k].getName()) == 0) 
+    if (item.getName().compare(inventory[k].getName()) == 0)
 
     {
 
@@ -203,37 +190,34 @@ int checkInventory(object item)
 
       //No need to continue the loop
       break;
-
     }
-
   }
 
   //If the item is not found a 0 is returned
   return 0;
-
 }
 
 //Function that will remove an item
-//Needs an object and amount to remove to be passed in 
-void removeItemFromInventory(object item, int amount) 
+//Needs an object and amount to remove to be passed in
+void removeItemFromInventory(object item, int amount)
 
 {
 
   //Loops through the inventory
-  for (int j = 0; j < inventory.size(); j++) 
+  for (int j = 0; j < inventory.size(); j++)
 
   {
 
     //Compares the name of the object passed in with an item on the inventory
-    if (inventory[j].getName().compare(item.getName()) == 0 && inventory[j].getQuality().compare(item.getQuality()) == 0) 
+    if (inventory[j].getName().compare(item.getName()) == 0 && inventory[j].getQuality().compare(item.getQuality()) == 0)
 
     {
-      
+
       //Removes amount from the quantity of the object
       inventoryQuantity[j] -= amount;
 
       //Checks if the inventory quantity is equal or lower than 0
-      if (inventoryQuantity[j] <= 0) 
+      if (inventoryQuantity[j] <= 0)
 
       {
 
@@ -241,16 +225,12 @@ void removeItemFromInventory(object item, int amount)
         //That item will be deleted
         inventoryQuantity.erase(inventoryQuantity.begin() + j);
         inventory.erase(inventory.begin() + j);
-
       }
 
       //If the item was found no need to continue the loop
       break;
-
     }
-
   }
-
 }
 
 /*Prints the inventory of the player
@@ -258,7 +238,7 @@ void removeItemFromInventory(object item, int amount)
 ** 0: Item1
 ** 1: Item2
 */
-void inventoryPrint(int usePrint = 0) 
+void inventoryPrint(int usePrint = 0)
 
 {
 
@@ -272,13 +252,13 @@ void inventoryPrint(int usePrint = 0)
 
     //Variavles starting with items hold the properties of the object in the inventory
     //Needs to be turned into const char* for mvprintw
-    const char *itemQuality       =  inventory[q].getQuality().c_str();
-    const char *itemName      =  inventory[q].getName().c_str();
-    int         itemQuantity  =  inventoryQuantity[q];
+    const char *itemQuality = inventory[q].getQuality().c_str();
+    const char *itemName = inventory[q].getName().c_str();
+    int itemQuantity = inventoryQuantity[q];
 
     //Checks which way it should print the inventory
-    if (usePrint == 1) 
-    
+    if (usePrint == 1)
+
     {
 
       //Will print the item quality and name if it has any, if none then it will only print the name
@@ -286,9 +266,8 @@ void inventoryPrint(int usePrint = 0)
 
       {
 
-        //Prints the index, quality, name and quantity of the item 
+        //Prints the index, quality, name and quantity of the item
         mvprintw(q + 1, 0, "%d: %s %s %d ", q, itemQuality, itemName, itemQuantity);
-
       }
 
       else
@@ -296,24 +275,21 @@ void inventoryPrint(int usePrint = 0)
       {
 
         //Prints the index, name and quantity of the item
-        mvprintw(q + 1, 0, "%d: %s %d ",q , itemName, itemQuantity);
-
+        mvprintw(q + 1, 0, "%d: %s %d ", q, itemName, itemQuantity);
       }
+    }
 
-    } 
-
-    else 
+    else
 
     {
 
       //Will print the item quality and name if it has any, if none then it will only print the name
       if (inventory[q].getQuality().compare("none") != 0)
-      
+
       {
 
         //Prints the quality, name and quantity of the item
         mvprintw(q + 1, 0, "%s %s %d ", itemQuality, itemName, itemQuantity);
-
       }
 
       else
@@ -322,13 +298,10 @@ void inventoryPrint(int usePrint = 0)
 
         //Prints the name and quantity of the item
         mvprintw(q + 1, 0, "%s %d ", itemName, itemQuantity);
-
       }
-
     }
 
     count++;
-
   }
 
   //Checks if there is an item in the hotbar
@@ -342,15 +315,14 @@ void inventoryPrint(int usePrint = 0)
     const char *hotbarQuality = hotBar[0].getQuality().c_str();
 
     mvprintw(count + 2, 0, "In your hotbar: ");
-  
+
     //Prints quality and name of the item
     mvprintw(count + 3, 0, "%s %s", hotbarQuality, hotbarItem);
-
   }
-
 }
 
-void terrainFunc() {
+void terrainFunc()
+{
 
   /*
   Runs the terrain function inside map.hpp
@@ -376,87 +348,78 @@ void terrainFunc() {
       stagesVec[currentStage[0]][currentStage[1]].getMerchant().getPos());
 
   //Prints the amount of health the player has
-  for (int d = 0; d < player.getHealth(); d++) 
-  
+  for (int d = 0; d < player.getHealth(); d++)
+
   {
 
     mvprintw(HEIGHT, d, "H"); //💚
-  
   }
 
   //Prints damage of the player
   //If the player is using an item then the item damage will be displayed
   //If hotbar size is bigger than 0 then the player is using an item
-  if (hotBar.size() > 0) 
-  
+  if (hotBar.size() > 0)
+
   {
 
-    for (int d = 0; d < hotBar[0].getDamage(); d++) 
-    
-    {
-      
-      mvprintw(HEIGHT + 1, d, "W"); //⚔
+    for (int d = 0; d < hotBar[0].getDamage(); d++)
 
-    }
-  
-  } 
-  
-  else 
-  
-  {
-   
-    for (int d = 0; d < player.getDamage(); d++) 
-    
     {
-    
+
       mvprintw(HEIGHT + 1, d, "W"); //⚔
-    
     }
-  
   }
 
+  else
+
+  {
+
+    for (int d = 0; d < player.getDamage(); d++)
+
+    {
+
+      mvprintw(HEIGHT + 1, d, "W"); //⚔
+    }
+  }
 }
 
 //Fix for items being the same on every instance of the game
 //Called before pushing new items into the current variables
-void randomItemQuality() 
+void randomItemQuality()
 
 {
 
   //Loops throuhg the items array
-  for (int v = 0; v < sizeof(items)/sizeof(items[0]); v++) 
+  for (int v = 0; v < sizeof(items) / sizeof(items[0]); v++)
 
   {
 
     items[v].randomQuality();
-
   }
 
   //Re-assigns chest content to update them with new items
-  object chestContent[] =  
+  object chestContent[] =
 
-                          {
-                            items[0],
+      {
+          items[0],
 
-                            items[1],
+          items[1],
 
-                            items[2],
+          items[2],
 
-                            items[3]
-                          };
+          items[3]};
 
   //Re-assigns enemy content to update them with new items
-  object enemyContent[] =  
+  object enemyContent[] =
 
-                          {
-                            items[4],
-                            items[5]
-                          };
+      {
+          items[4],
+          items[5]};
 }
 
 //Setsup the game by giving its first chest and enemy
 //Starts neccesary function for ncurses
-void setup() 
+void setup()
 
 {
 
@@ -483,11 +446,11 @@ void setup()
   /*std::vector <chest> chestNewVec;
   chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));*/
 
-  std::vector <stage> stageNewVec;
+  std::vector<stage> stageNewVec;
   stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
 
   //Checks if the merchant and the chest has the same position
- /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
+  /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
   
   {
 
@@ -503,7 +466,6 @@ void setup()
   //Creates an enemy vector that will be pushed into the enemy vector
   //std::vector<enemy> enemyNewVec;
   //enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
-
 
   /*if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
@@ -545,7 +507,7 @@ void setup()
 }
 
 //Checks the player is on a new stage, if so it will add a chest and enemy
-void checkStage() 
+void checkStage()
 
 {
 
@@ -553,8 +515,8 @@ void checkStage()
   int newStage = 0;
 
   //Iterates through the stages that have already been visited
-  for (int h = 0; h < stagesVisited.size(); h++) 
-  
+  for (int h = 0; h < stagesVisited.size(); h++)
+
   {
 
     //Checks if the stage the player is on
@@ -564,17 +526,15 @@ void checkStage()
 
       //Adds to newStage if the current stage is different from one of the stages visited
       newStage++;
-
     }
-
   }
 
   //If newstage's value is equal to the amount of stage visited then it is a new stage
-  if (newStage == stagesVisited.size()) 
-  
+  if (newStage == stagesVisited.size())
+
   {
-  
-  randomItemQuality();
+
+    randomItemQuality();
 
     /*if (currentStage[0] % 10 == 0 && currentStage[1] % 10 == 0) 
     
@@ -589,8 +549,8 @@ void checkStage()
 
     //Adds a new chest, enemy and trader if there is a new x axis
     //Checks if there is a new x axis
-    if (currentStage[0] >= stagesVec.size()) 
-    
+    if (currentStage[0] >= stagesVec.size())
+
     {
 
       //Creates a chest vector that will be pushed into the chest vector
@@ -598,7 +558,7 @@ void checkStage()
       stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
 
       //Checks if the chest has the same position as the merchant
-     /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
+      /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
       
       {
 
@@ -629,23 +589,20 @@ void checkStage()
       //Pushes the enemy vector into the enemy vector
       enemyVec.push_back(enemyNewVec);
 */
+    }
 
-    } 
-    
-    else 
-    
+    else
+
     {
-      
+
       /*Adds a new chest, enemy and trade if there is a new y axis*/
 
       //chestsVec[currentStage[0]].push_back(chest(rand() % WIDTH, rand() % HEIGHT));
-        stagesVec[currentStage[0]].push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
+      stagesVec[currentStage[0]].push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
       //enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
-    
     }
 
-
-      //Checks if the trader has the same position as the enemy
+    //Checks if the trader has the same position as the enemy
     /*if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos() == chestsVec[currentChest[0]][currentChest[1]].getPos()) 
     
     {
@@ -661,7 +618,6 @@ void checkStage()
     vec.push_back(currentStage[0]);
     vec.push_back(currentStage[1]);
     stagesVisited.push_back(vec);
-
   }
 
   //Attempted fix of game crashing due to not having enought stages
@@ -678,10 +634,9 @@ void checkStage()
     enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
 
   }*/
-
 }
 
-void addToInventory(object item) 
+void addToInventory(object item)
 
 {
 
@@ -697,52 +652,50 @@ void addToInventory(object item)
   //The amount of one item will always start at 1
   inventoryQuantity.push_back(1);
 
-  for (int n = 0; n < inventory.size(); n++) 
-  
+  for (int n = 0; n < inventory.size(); n++)
+
   {
 
     //Checks if the inventory has the item we have picked up
-    if (inventory[n].getName() == item.getName() && inventory[n].getQuality() == item.getQuality()) 
-    
+    if (inventory[n].getName() == item.getName() && inventory[n].getQuality() == item.getQuality())
+
     {
 
       //Checks if it is the first one
-      if (first == 0) {
+      if (first == 0)
+      {
 
         //Stores the repeated item index
         repeatIndex = n;
 
         //Changes first so it doesn't run again
         first = 1;
-
       }
 
       //Adds one to repeat
       repeat += 1;
-
     }
-
   }
 
   //Adds repeat to the amount of the inventory
-  if (first == 1) {
+  if (first == 1)
+  {
 
     repeat = repeat + inventoryQuantity[repeatIndex];
 
     inventoryQuantity[repeatIndex] = repeat;
-
   }
 
   //If there is no repeat then adds one
-  if (repeat == 0) {
+  if (repeat == 0)
+  {
 
     inventory.push_back(item);
-
   }
 }
 
 //Opens the chest, adds items into inventory
-void openChest() 
+void openChest()
 
 {
 
@@ -750,7 +703,7 @@ void openChest()
   if ((player.getPos()[0] - (currentStage[0] * WIDTH)) == stagesVec[currentStage[0]][currentStage[1]].getChest().getPos()[0] && (player.getPos()[1] - (currentStage[1] * HEIGHT)) == stagesVec[currentStage[0]][currentStage[1]].getChest().getPos()[1])
 
   {
-    
+
     //Shows the open chest text(items obtained)
     openChestShow = true;
     interactShow = false;
@@ -763,7 +716,7 @@ void openChest()
 
       //Loops randomly max 4, min 1 times to get multiple items
       for (int i = 0; i < (rand() % 3) + 1; i++)
-      
+
       {
 
         //Different number every time
@@ -773,65 +726,55 @@ void openChest()
         randomItemQuality();
 
         //Chooses a random item inside chest content
-        int currentItemIndex = rand() % sizeof(chestContent)/sizeof(chestContent[0]);
+        int currentItemIndex = rand() % sizeof(chestContent) / sizeof(chestContent[0]);
 
         //Prints what is on the chest based on the currentItemIndex
-        const char *itemName    = chestContent[currentItemIndex].getName().c_str();
+        const char *itemName = chestContent[currentItemIndex].getName().c_str();
         const char *itemQuality = chestContent[currentItemIndex].getQuality().c_str();
-
 
         //Checks if the item has a quality, if none then no quality will print
         if (chestContent[currentItemIndex].getQuality().compare("none") != 0)
-        
+
         {
-          
+
           //Prints item quality and name
           mvprintw(i + 2, 0, "You have gotten %s %s", itemQuality, itemName);
+        }
 
-        } 
-        
-        else 
-        
+        else
+
         {
 
           //Prints item name
           mvprintw(i + 2, 0, "You have gotten %s", itemName);
-
         }
 
         //Adds the items obtained into the inventory
         addToInventory(chestContent[currentItemIndex]);
-
       }
 
       //Changes the state of the chest to opened
       //chestsVec[currentChest[0]][currentChest[1]].setState(1);-----------------------------------------------------
+    }
 
-    } 
-    
-    else 
-    
+    else
+
     {
 
       mvprintw(0, 0, "You have already opened this chest.");
-
     }
+  }
 
+  else
 
-  } 
-  
-  else 
-  
   {
 
     mvprintw(0, 0, "Nothing to interact with");
-
   }
-
 }
 
 //Hits enemy, substract healths from enemy and player
-void hitEnemy() 
+void hitEnemy()
 
 {
 
@@ -1011,7 +954,6 @@ void hitEnemy()
     }
 
   } */
-
 }
 
 void usePrint()
@@ -1028,8 +970,7 @@ void usePrint()
   {
 
     mvprintw(0, 0, "Nothing there");
-
-  } 
+  }
 
   else
 
@@ -1041,65 +982,58 @@ void usePrint()
     int itemHealth = inventory[choice].getHealth();
     int itemDamage = inventory[choice].getDamage();
 
-
     //Prints the item used
-    if (inventory[choice].getQuality().compare("none") != 0 ) 
-    
+    if (inventory[choice].getQuality().compare("none") != 0)
+
     {
 
       //Prints quality and name of the item
       mvprintw(0, 0, "You are wielding %s %s", itemQuality, itemName);
-      
     }
-    
-     else 
-     
-     {
-      
+
+    else
+
+    {
+
       //Prints the name of the item
       mvprintw(0, 0, "You used %s", itemName);
-
     }
 
     //Checks if the item gives health to the player
-    if (itemHealth > 0) 
-    
+    if (itemHealth > 0)
+
     {
-      
+
       //Adds health to player and take the item out of the inventory
       player.changeHealth(itemHealth);
       inventoryQuantity[choice]--;
       mvprintw(1, 0, "You now have %d more health", itemHealth);
-
     }
 
     //Checks if the item give more damage to the player
-    if (itemDamage > 0) 
-    
+    if (itemDamage > 0)
+
     {
 
-        //Pushes the item into the hotbar
-        hotBar.push_back(inventory[choice]);
-        inventoryQuantity[choice]--;
+      //Pushes the item into the hotbar
+      hotBar.push_back(inventory[choice]);
+      inventoryQuantity[choice]--;
 
-        //Removes item from the hotbar if there is an item there
-        if (hotBar.size() > 1) 
-        
-        {
+      //Removes item from the hotbar if there is an item there
+      if (hotBar.size() > 1)
 
-          addToInventory(hotBar[0]);
-          hotBar.erase(hotBar.begin());
+      {
 
-        }
-      
-        mvprintw(1, 0, "You now do %d more damage", itemDamage);
+        addToInventory(hotBar[0]);
+        hotBar.erase(hotBar.begin());
+      }
+
+      mvprintw(1, 0, "You now do %d more damage", itemDamage);
     }
-
   }
-
 }
 
-void sell() 
+void sell()
 
 {
 
@@ -1175,10 +1109,10 @@ void sell()
 */
 }
 
-void buy() 
+void buy()
 
 {
-/*
+  /*
   //Keeps track of the spaces in the y-axis
   int count;
 
@@ -1254,10 +1188,10 @@ void buy()
 */
 }
 
-void moveStage() 
+void moveStage()
 
 {
-/*
+  /*
     //Checks if the player has moved to a new stage
     //LEFT
     if (player.getPos()[0] <= (WIDTH * currentStage[0]) - 1) 
@@ -1313,7 +1247,7 @@ void moveStage()
 */
 }
 
-void statsPrint() 
+void statsPrint()
 
 {
 
@@ -1323,7 +1257,7 @@ void statsPrint()
   * Enemy
   * Player
   */
-    /*
+  /*
     mvprintw(0, 0, "Current stage: ");
     mvprintw(1, 0, " %d %d", abs(currentStage[0]), abs(currentStage[1]));
 
@@ -1344,10 +1278,10 @@ void statsPrint()
     */
 }
 
-void selectPrint() 
+void selectPrint()
 
 {
-/*
+  /*
   //Prints different words depending on the type
   if (type == 0)
 
@@ -1449,32 +1383,29 @@ void selectPrint()
 */
 }
 
-void interactPrint() 
+void interactPrint()
 
 {
 
   //Will print the open chest or the hit enemy screen depending on which one is true
   openChest();
   hitEnemy();
-
 }
 
-void sellPrint() 
+void sellPrint()
 
 {
 
   //Prints the sell screen
   sell();
-
 }
 
-void buyPrint() 
+void buyPrint()
 
 {
 
   //Prints the buy screen
   buy();
-
 }
 
 void draw()
@@ -1484,75 +1415,68 @@ void draw()
   clear();
 
   //Loops through every item in buyItems, making the merchant always have different items
-  for (int v = 0; v < buyItems.size(); v++) {
+  for (int v = 0; v < buyItems.size(); v++)
+  {
 
     buyItems[v].randomQuality();
-
   }
 
   //Calls the terrain function on map.hpp
-  if (mapShow == true) 
-  
+  if (mapShow == true)
+
   {
-    
+
     //Prints the map on the screen
     terrainFunc();
-  
   }
 
-  if (inventoryShow == true) 
-  
+  if (inventoryShow == true)
+
   {
-    
+
     //Prints the inventory onto the screen
     mvprintw(0, 0, "In your inventory: ");
     inventoryPrint();
-  
   }
 
-  if (statsShow == true) 
-  
+  if (statsShow == true)
+
   {
-  
+
     //Prints the stats into the screen
     statsPrint();
-  
   }
 
   if (selectShow == true)
-  
+
   {
 
     //Prints which item will be selected for buy, sell and use onto the screen
     selectPrint();
-
   }
 
-  if (useShow == true) 
-  
+  if (useShow == true)
+
   {
 
     //Prints what item is going to be used onto the screen
     usePrint();
-
   }
 
-  if (interactShow == true) 
-  
+  if (interactShow == true)
+
   {
-  
+
     //Prints what has been interacted with(chest or enemy)
     interactPrint();
-  
   }
 
-  if (sellShow == true) 
-  
+  if (sellShow == true)
+
   {
-    
+
     //Prints what the player has sold
     sellPrint();
-  
   }
 
   if (buyShow == true)
@@ -1561,51 +1485,46 @@ void draw()
 
     //Prints what the player has bought
     buyPrint();
-  
   }
 
   refresh();
-  
+
   /*
   The following if statements will stop the program and let the used read that has happened
   Fix for player not being able to leave the certain screen
   */
 
-
   //Item used
-  if (useShow == true) 
-  
+  if (useShow == true)
+
   {
-  
+
     sleep(1);
 
     useShow = false;
     mapShow = true;
-  
   }
 
   //Chest content
   if (openChestShow == true)
-  
+
   {
-  
+
     sleep(2);
 
     openChestShow = false;
     mapShow = true;
-
   }
 
   //What has been interacted with
-  if (interactShow == true) 
-  
+  if (interactShow == true)
+
   {
 
     sleep(1);
 
     interactShow = false;
-    mapShow      = true;
-
+    mapShow = true;
   }
 
   //How much damage has been done to the enemy and what rewards were gotten
@@ -1617,35 +1536,32 @@ void draw()
 
     hitEnemyShow = false;
     mapShow = true;
-
   }
 
   //What the has been sold
-  if (sellShow == true) 
-  
+  if (sellShow == true)
+
   {
-  
+
     sleep(1);
 
     sellShow = false;
     mapShow = true;
-  
   }
 
   //What has been bought
   if (buyShow == true)
-  
+
   {
     sleep(1);
 
     buyShow = false;
     mapShow = true;
-  
   }
-
 }
 
-void listener() {
+void listener()
+{
 
   //Enables event listerner for the keyboard
   keypad(stdscr, TRUE);
@@ -1660,10 +1576,10 @@ void listener() {
   {
 
   case KEY_LEFT:
-      //Moves player to the left
-      player.changeDir(-1, 0);
-      player.move();
-      moveStage();
+    //Moves player to the left
+    player.changeDir(-1, 0);
+    player.move();
+    moveStage();
     break;
 
   case KEY_RIGHT:
@@ -1686,15 +1602,15 @@ void listener() {
     player.move();
     moveStage();
     break;
-  
+
   case 'e':
     //For inventory
-    if (inventoryShow == false) 
+    if (inventoryShow == false)
     {
       inventoryShow = true;
       mapShow = false;
-    } 
-    else 
+    }
+    else
     {
       inventoryShow = false;
       mapShow = true;
@@ -1708,7 +1624,9 @@ void listener() {
       type = 0;
       mapShow = false;
       selectShow = true;
-    } else {
+    }
+    else
+    {
       mapShow = true;
       selectShow = false;
     }
@@ -1727,10 +1645,10 @@ void listener() {
       statsShow = false;
     }
     break;
-  
+
   case 'q':
-  //Ends the game
-   gameOver = true;
+    //Ends the game
+    gameOver = true;
     break;
 
   case 'r':
@@ -1780,45 +1698,39 @@ void listener() {
   default:
 
     break;
-
   }
-
 }
 
-
-
 //Main function
-int main() {
+int main()
+{
 
   //
   //Does functions that need to be done only once
   //
 
-    //Setsup arrays, vectors and ncurses
-    setup();
+  //Setsup arrays, vectors and ncurses
+  setup();
 
-    //Game loop that will stop when gameOver is equal to true
-    while (gameOver == false)
-    
+  //Game loop that will stop when gameOver is equal to true
+  while (gameOver == false)
+
+  {
+
+    //Slows down the game slightly
+    //sleep(1/2);
+
+    if (selectShow == false)
+
     {
-      
-      //Slows down the game slightly
-      //sleep(1/2);
-
-      if (selectShow == false)
-
-      {
-        //Checks key pressed unless the program is waiting for the user to select an item (buy, sell and use)
-        listener();
-      
-      }
-      
-      //Draws onto the screen depending on which show is true
-      draw();
-
+      //Checks key pressed unless the program is waiting for the user to select an item (buy, sell and use)
+      listener();
     }
+
+    //Draws onto the screen depending on which show is true
+    draw();
+  }
 
   //When loop has ended, the window will close
   endwin();
-
 }
