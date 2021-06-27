@@ -446,8 +446,8 @@ void setup()
   /*std::vector <chest> chestNewVec;
   chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));*/
 
-  std::vector<stage> stageNewVec;
-  stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
+  //std::vector<stage> stageNewVec;
+  //stageNewVec.push_back(stage(currentStage[0], currentStage[1], WIDTH, HEIGHT, buyItems));
 
   //Checks if the merchant and the chest has the same position
   /* if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) 
@@ -494,16 +494,16 @@ void setup()
   //tradersVec.push_back(traderNewVec);
 
   /*Items used for testing at the begining of the game*/
-  inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
+  /*inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
   inventory.push_back(object("Golden Sword", 0, 2, typesOfItems[2], 2, quality[0]));
   inventory.push_back(object("Iron Sword", 0, 3, typesOfItems[2], 3, quality[0]));
   inventoryQuantity.push_back(20);
   inventoryQuantity.push_back(20);
-  inventoryQuantity.push_back(20);
+  inventoryQuantity.push_back(20);*/
 
   //Pushes the first visited currentStage which is the one we start with(0, 0)
-  std::vector<int> vec(2, 0);
-  stagesVisited.push_back(vec);
+  //std::vector<int> vec(2, 0);
+  //stagesVisited.push_back(vec);
 }
 
 //Checks the player is on a new stage, if so it will add a chest and enemy
@@ -1411,7 +1411,7 @@ void buyPrint()
 void draw()
 
 {
-
+/*
   clear();
 
   //Loops through every item in buyItems, making the merchant always have different items
@@ -1493,7 +1493,7 @@ void draw()
   The following if statements will stop the program and let the used read that has happened
   Fix for player not being able to leave the certain screen
   */
-
+/*
   //Item used
   if (useShow == true)
 
@@ -1558,6 +1558,7 @@ void draw()
     buyShow = false;
     mapShow = true;
   }
+  */
 }
 
 void listener()

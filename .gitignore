@@ -13,3 +13,15 @@ c++/.vscode/ipch/b6cc0a3f54564aa/test.ipch
 c++/.vscode/ipch/b6cc0a3f54564aa/mmap_address.bin
 c++/.vscode/ipch/b310d3c64d713597/pro.ipch
 c++/.vscode/ipch/b310d3c64d713597/mmap_address.bin
+game/game/game
+game/game/.DS_Store
+game/game.xcodeproj/project.xcworkspace/xcuserdata/julianvidal.xcuserdatad/WorkspaceSettings.xcsettings
+game/game.xcodeproj/project.xcworkspace/xcuserdata/julianvidal.xcuserdatad/UserInterfaceState.xcuserstate
+game/game.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+game/game.xcodeproj/project.pbxproj
+game/game/game
+game/game/.DS_Store
+game/game.xcodeproj/project.xcworkspace/xcuserdata/julianvidal.xcuserdatad/UserInterfaceState.xcuserstate
+game/game.xcodeproj/project.pbxproj
+*.pbxproj
+*.xcuserstate
