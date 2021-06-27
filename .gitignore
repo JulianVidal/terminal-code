@@ -4,3 +4,6 @@ ants/
 examples/electron-quick-start/
 Plataformer/
 todogen/
+*.xcscheme
+*.xcuserstate
+*.plist

@@ -300,7 +300,7 @@ void terrainFunc() {
     std::cout << std::endl;
   }*/
 
-  terrain(
+  /*terrain(
     HEIGHT,
     WIDTH,
     currentStage[0],
@@ -314,7 +314,7 @@ void terrainFunc() {
     enemyVec[currentEnemy[0]][currentEnemy[1]].getHealth(),
     enemyVec[currentEnemy[0]][currentEnemy[1]].getDamage(),
     tradersVec[currentTrader[0]][currentTrader[1]].getPos()
-  );
+  );*/
 
   /*if (stepsBool == 1) {
     std::cout << "Too many steps" << std::endl;
@@ -374,17 +374,17 @@ void setup() {
   buyItems.push_back(items[0]);
   buyItems.push_back(items[1]);
   buyItems.push_back(items[3]);
-
+/*
   std::vector <chest> chestNewVec;
   chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
-  /*if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
+  if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
     chestNewVec.erase(chestNewVec.begin());
     chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
   }*/
-
+/*
   //Pushes a new chest into the chest vector
   chestsVec.push_back(chestNewVec);
 
@@ -392,14 +392,14 @@ void setup() {
   enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
   //Pushes a new enemy into the enemy vector
-
+*/
   /*if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
 
     enemyNewVec.erase(enemyNewVec.begin());
     enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
   }*/
-
+/*
   enemyVec.push_back(enemyNewVec);
 
   if (enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[0] == chestsVec[currentChest[0]][currentChest[1]].getPos()[0] && enemyVec[currentEnemy[0]][currentEnemy[1]].getPos()[1] == chestsVec[currentChest[0]][currentChest[1]].getPos()[1]) {
@@ -421,14 +421,14 @@ void setup() {
   //Pushes the first visited currentStage which is the one we start with(0, 0)
   std::vector<int> vec(2, 0);
   stagesVisited.push_back(vec);
-
+*/
   //Changes the value of setup so the statement only runs once
   setupBool = 1;
 }
 
 //Checks the player is on a new stage, if so it will add a chest and enemy
 void checkStage() {
-
+/*
   //Hold the value of whether or not the player is on a new stage
   int newStage = 0;
 
@@ -512,6 +512,7 @@ void checkStage() {
 
     enemyVec[currentStage[0]].push_back(enemy(rand() % WIDTH, rand() % HEIGHT, currentStage[0]));
   }
+ */
 }
 
 void addToInventory(object item) {

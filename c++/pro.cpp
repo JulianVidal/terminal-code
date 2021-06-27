@@ -805,7 +805,7 @@ void openChest()
       }
 
       //Changes the state of the chest to opened
-      chestsVec[currentChest[0]][currentChest[1]].setState(1);
+      //chestsVec[currentChest[0]][currentChest[1]].setState(1);-----------------------------------------------------
 
     } 
     
@@ -835,7 +835,7 @@ void hitEnemy()
 
 {
 
-  //Different number every time
+  /*//Different number every time
   srand(time(0));
 
   //Randomises items
@@ -1010,7 +1010,7 @@ void hitEnemy()
 
     }
 
-  } 
+  } */
 
 }
 
@@ -1103,7 +1103,7 @@ void sell()
 
 {
 
-  //Keeps track of the spaces in the y-axis
+  /*//Keeps track of the spaces in the y-axis
   int count = 0;
 
   //Checks if the trader and player have the same position
@@ -1172,13 +1172,13 @@ void sell()
     }
 
   }
-
+*/
 }
 
 void buy() 
 
 {
-
+/*
   //Keeps track of the spaces in the y-axis
   int count;
 
@@ -1251,13 +1251,13 @@ void buy()
     count++;
   
   }
-
+*/
 }
 
 void moveStage() 
 
 {
-
+/*
     //Checks if the player has moved to a new stage
     //LEFT
     if (player.getPos()[0] <= (WIDTH * currentStage[0]) - 1) 
@@ -1310,7 +1310,7 @@ void moveStage()
     currentTrader[0]  = currentStage[0] / 10;
     currentTrader[1]  = currentStage[1] / 10;
   }
-
+*/
 }
 
 void statsPrint() 
@@ -1323,7 +1323,7 @@ void statsPrint()
   * Enemy
   * Player
   */
-
+    /*
     mvprintw(0, 0, "Current stage: ");
     mvprintw(1, 0, " %d %d", abs(currentStage[0]), abs(currentStage[1]));
 
@@ -1341,11 +1341,13 @@ void statsPrint()
 
     mvprintw(8, 0, "  Health: %d", player.getHealth());
     mvprintw(9, 0, "  Damage: %d", player.getDamage());
+    */
 }
 
 void selectPrint() 
 
 {
+/*
   //Prints different words depending on the type
   if (type == 0)
 
@@ -1444,7 +1446,7 @@ void selectPrint()
   }
 
  }
-
+*/
 }
 
 void interactPrint() 
