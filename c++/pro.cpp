@@ -349,10 +349,10 @@ void terrainFunc()
       currentStage[0],
       currentStage[1],
       player.getPos(),
-      chestsVec[currentStage[0]][currentStage[1]].getPos(),
-      enemyVec[currentStage[0]][currentStage[1]].getPos(),
-      enemyVec[currentStage[0]][currentStage[1]].getState(),
-      tradersVec[currentStage[0]][currentStage[1]].getPos());
+      chestsVec[currentChest[0]][currentChest[1]].getPos(),
+      enemyVec[currentEnemy[0]][currentEnemy[1]].getPos(),
+      enemyVec[currentEnemy[0]][currentEnemy[1]].getState(),
+      tradersVec[currentTrader[0]][currentTrader[1]].getPos());
 
   //Prints the amount of health the player has
   for (int d = 0; d < player.getHealth(); d++)
@@ -537,18 +537,22 @@ void checkStage() {
     randomItemQuality();
     if (currentStage[0] % 10 == 0 && currentStage[1] % 10 == 0) {
 
+      //Creates trade vector that is pushed into the trade vector
       std::vector <merchant> traderNewVec;
       traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
       tradersVec.push_back(traderNewVec);
     }
-    //Adds a new chest to the chests vector
-    if (currentStage[0] >= chestsVec.size()) {
 
+    //Adds a new chest to the chests vector
+    //Checks if there is a new x axis
+    if (currentStage[0] >= chestsVec.size()) {
       std::vector <chest> chestNewVec;
       chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
-
+      
+      //Checks if the chest has the same position as the merchant
       if (chestNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
-
+        
+        //If the merchant and chest have the same position then the chest will chose a new position
         chestNewVec.erase(chestNewVec.begin());
         chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
 
@@ -557,19 +561,21 @@ void checkStage() {
       //Pushes a new chest into the chest vector
       chestsVec.push_back(chestNewVec);
 
+      //Creates an enemy vector that will be pushed into the enemy vector
       std::vector <enemy> enemyNewVec;
       enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT, (currentStage[0] + currentStage[1])));
 
+      //Checks if the trader has the same position as the enemy
       if (enemyNewVec[0].getPos() == tradersVec[currentTrader[0]][currentTrader[1]].getPos()) {
-
+        
+        //If merchant and enemy has the position then the enemy chooses a new position  
         enemyNewVec.erase(enemyNewVec.begin());
         enemyNewVec.push_back(enemy(rand() % WIDTH, rand() % HEIGHT));
 
       }
-
+      
+      //Pushes the enemy vector into the enemy vector
       enemyVec.push_back(enemyNewVec);
-
-
 
     } else {
 
@@ -991,12 +997,11 @@ void sell()
   int count = 0;
 
   //Checks if the trader and player have the same position
-  if ((player.getPos()[0] - (currentStage[0] * WIDTH)) == tradersVec[currentTrader[0]][currentTrader[1]].getPos()[0] && (player.getPos()[1] - (currentStage[1] * HEIGHT)) == tradersVec[currentTrader[0]][currentTrader[1]].getPos()[1])
+  // if ((player.getPos()[0] - (currentStage[0] * WIDTH)) == tradersVec[currentTrader[0]][currentTrader[1]].getPos()[0] && (player.getPos()[1] - (currentStage[1] * HEIGHT)) == tradersVec[currentTrader[0]][currentTrader[1]].getPos()[1])
   
-  {
+  // {
 
-    //Prints the sell screen
-    sellShow = true;
+    //Removes the selection screen
     selectShow = false;
 
     //Checks if the choice(Number pressed by the player) is inside the inventory
@@ -1012,6 +1017,7 @@ void sell()
     else 
     
     {
+
       removeItemFromInventory(inventory[choice], 1);
 
       //Variables starting with item hold the item sold properties
@@ -1055,7 +1061,7 @@ void sell()
       
     }
 
-  }
+  // }
 
 }
 
@@ -1063,15 +1069,14 @@ void buy()
 
 {
   //Keeps track of the spaces in the y-axis
-  int count;
+  int count = 0;
+
+  //Removes the selection screen
+  selectShow = false;
 
   //Checks if the choice(key pressed by the player) is inside the items sold of the merchant
   if (choice < tradersVec[currentTrader[0]][currentTrader[1]].getItems().size())
   {
-
-    //Prints the buy screen
-    buyShow = true;
-    selectShow = false;
 
     //Amount that the item bought is worth
     int coinAmount = checkInventory(items[2]);
@@ -1134,6 +1139,7 @@ void buy()
     count++;
   
   }
+  
 }
 
 void moveStage()
@@ -1326,7 +1332,6 @@ void selectPrint()
     buyShow = true;
 
   }
-
  }
 
 }
