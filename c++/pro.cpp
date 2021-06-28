@@ -449,6 +449,12 @@ void setup()
   buyItems.push_back(items[1]);
   buyItems.push_back(items[3]);
 
+  //creates a trade vector that will be pushed into the trade vector
+  std::vector <merchant> traderNewVec;
+  traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
+  tradersVec.push_back(traderNewVec);
+
+
   //Creates a chest vector that will be pushed into the chest vectors array
   std::vector <chest> chestNewVec;
   chestNewVec.push_back(chest(rand() % WIDTH, rand() % HEIGHT));
@@ -494,11 +500,6 @@ void setup()
   enemyVec[currentEnemy[0]][currentEnemy[1]].setPos(round(chestsVec[currentChest[0]][currentChest[1]].getPos()[0] / 2), round(chestsVec[currentChest[0]][currentChest[1]].getPos()[1] / 2));
 
   }
-
-  //creates a trade vector that will be pushed into the trade vector
-  std::vector <merchant> traderNewVec;
-  traderNewVec.push_back(merchant((WIDTH / 2), 0, buyItems));
-  tradersVec.push_back(traderNewVec);
 
   /*Items used for testing at the begining of the game*/
   inventory.push_back(object("Health Potion", 1, 0, typesOfItems[0], 2));
@@ -660,12 +661,10 @@ void addToInventory(object item)
 }
 
 //Opens the chest, adds items into inventory
-void openChest()
-
-{
+void openChest(){
 
   //Checks if the position of the player is on top of the position of the chest
-  if ((player.getPos()[0] - (currentStage[0] * WIDTH)) == stagesVec[currentStage[0]][currentStage[1]].getChest().getPos()[0] && (player.getPos()[1] - (currentStage[1] * HEIGHT)) == stagesVec[currentStage[0]][currentStage[1]].getChest().getPos()[1])
+  if ((player.getPos()[0] - (currentStage[0] * WIDTH)) == chestsVec[currentChest[0]][currentChest[1]].getPos()[0] && (player.getPos()[1] - (currentStage[1] * HEIGHT)) == chestsVec[currentChest[0]][currentChest[1]].getPos()[1])
 
   {
 
@@ -674,15 +673,13 @@ void openChest()
     interactShow = false;
 
     //Checks if that chest has been opened
-    if (stagesVec[currentStage[0]][currentStage[1]].getChest().getState() == 0)
+    if (chestsVec[currentChest[0]][currentChest[1]].getState() == 0)
     {
 
       mvprintw(0, 0, "You have opened a chest");
 
       //Loops randomly max 4, min 1 times to get multiple items
-      for (int i = 0; i < (rand() % 3) + 1; i++)
-
-      {
+      for (int i = 0; i < (rand() % 3) + 1; i++) {
 
         //Different number every time
         srand(time(0));
@@ -698,17 +695,10 @@ void openChest()
         const char *itemQuality = chestContent[currentItemIndex].getQuality().c_str();
 
         //Checks if the item has a quality, if none then no quality will print
-        if (chestContent[currentItemIndex].getQuality().compare("none") != 0)
-
-        {
-
+        if (chestContent[currentItemIndex].getQuality().compare("none") != 0) {
           //Prints item quality and name
           mvprintw(i + 2, 0, "You have gotten %s %s", itemQuality, itemName);
-        }
-
-        else
-
-        {
+        } else {
 
           //Prints item name
           mvprintw(i + 2, 0, "You have gotten %s", itemName);
@@ -719,13 +709,8 @@ void openChest()
       }
 
       //Changes the state of the chest to opened
-      //chestsVec[currentChest[0]][currentChest[1]].setState(1);-----------------------------------------------------
-    }
-
-    else
-
-    {
-
+      chestsVec[currentChest[0]][currentChest[1]].setState(1);
+    } else {
       mvprintw(0, 0, "You have already opened this chest.");
     }
   }
@@ -743,7 +728,7 @@ void hitEnemy()
 
 {
 
-  /*//Different number every time
+  //Different number every time
   srand(time(0));
 
   //Randomises items
@@ -918,7 +903,7 @@ void hitEnemy()
 
     }
 
-  } */
+  }
 }
 
 void usePrint()
@@ -1002,7 +987,7 @@ void sell()
 
 {
 
-  /*//Keeps track of the spaces in the y-axis
+  //Keeps track of the spaces in the y-axis
   int count = 0;
 
   //Checks if the trader and player have the same position
@@ -1071,13 +1056,12 @@ void sell()
     }
 
   }
-*/
+
 }
 
 void buy()
 
 {
-  /*
   //Keeps track of the spaces in the y-axis
   int count;
 
@@ -1150,13 +1134,12 @@ void buy()
     count++;
   
   }
-*/
 }
 
 void moveStage()
 
 {
-  /*
+
     //Checks if the player has moved to a new stage
     //LEFT
     if (player.getPos()[0] <= (WIDTH * currentStage[0]) - 1) 
@@ -1209,7 +1192,7 @@ void moveStage()
     currentTrader[0]  = currentStage[0] / 10;
     currentTrader[1]  = currentStage[1] / 10;
   }
-*/
+
 }
 
 void statsPrint()
@@ -1222,7 +1205,7 @@ void statsPrint()
   * Enemy
   * Player
   */
-  /*
+  
     mvprintw(0, 0, "Current stage: ");
     mvprintw(1, 0, " %d %d", abs(currentStage[0]), abs(currentStage[1]));
 
@@ -1240,13 +1223,13 @@ void statsPrint()
 
     mvprintw(8, 0, "  Health: %d", player.getHealth());
     mvprintw(9, 0, "  Damage: %d", player.getDamage());
-    */
+    
 }
 
 void selectPrint()
 
 {
-  /*
+  
   //Prints different words depending on the type
   if (type == 0)
 
@@ -1345,7 +1328,7 @@ void selectPrint()
   }
 
  }
-*/
+
 }
 
 void interactPrint()
@@ -1376,7 +1359,6 @@ void buyPrint()
 void draw()
 
 {
-/*
   clear();
 
   //Loops through every item in buyItems, making the merchant always have different items
@@ -1458,7 +1440,7 @@ void draw()
   The following if statements will stop the program and let the used read that has happened
   Fix for player not being able to leave the certain screen
   */
-/*
+
   //Item used
   if (useShow == true)
 
@@ -1523,7 +1505,7 @@ void draw()
     buyShow = false;
     mapShow = true;
   }
-  */
+
 }
 
 void listener()
