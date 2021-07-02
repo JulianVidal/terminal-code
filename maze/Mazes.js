@@ -877,7 +877,7 @@ class GrowingTreeMaze extends Maze {
     visited.add(x + ',' + y)
 
     while (path.length > 0) {
-      ;[x, y] = path[Math.floor(path.length * Math.random())]
+      [x, y] = path[Math.floor(path.length * Math.random())]
       if (
         (visited.has(x + 1 + ',' + y) || x === this.width / this.scale - 1) &&
         (visited.has(x + ',' + (y + 1)) ||
@@ -899,14 +899,14 @@ class GrowingTreeMaze extends Maze {
         x + dx >= this.width / this.scale ||
         visited.has(x + dx + ',' + (y + dy))
       ) {
-        ;[dx, dy] = this.randomDirection()
+        [dx, dy] = this.randomDirection()
       }
 
       x += dx
       y += dy
       visited.add(x + ',' + y)
       this.instrs.push({ x, y, dx: -dx, dy: -dy })
-      this.instrs.push({ x, y, dx, dy})
+      this.instrs.push({ x, y})
       path.push([x, y])
     }
   }
